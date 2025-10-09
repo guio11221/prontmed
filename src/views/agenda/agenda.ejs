@@ -1,0 +1,245 @@
+<%
+// Define constantes e funções de formatação (manter apenas o essencial)
+const todayDate = new Date();
+const formattedDate = todayDate.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+
+// O cálculo de compromissosMapeados e a filtragem foram removidos, 
+// pois agora são feitos pelo JavaScript (AgendaManager.loadDay)
+%>
+
+ 
+
+    <%- include("../partials/navbar")%>
+
+
+    <div class="container-fluid mt-3">
+        
+        <div class="d-flex justify-content-between mb-3 pb-2 agenda-header">
+            <div class="d-flex align-items-center">
+                <% if (user.role === "MEDICO") { %> 
+                <button class="btn btn-success me-3 shadow-sm" id="nova-consulta" data-bs-toggle="modal" data-bs-target="#novaConsultaModal">
+                    <i class="bi bi-plus-circle me-1"></i> Nova Consulta
+                </button>
+                <% } %> 
+                <button class="btn btn-outline-secondary me-3 btn-sm" id="ir-para-hoje">Hoje</button>
+            </div>
+            
+            <div class="d-flex align-items-center">
+                <button class="btn btn-light btn-sm me-1 agenda-nav-btn" id="prev-day" aria-label="Dia Anterior"><i class="bi bi-chevron-left"></i></button>
+                <button class="btn btn-light btn-sm me-3 agenda-nav-btn" id="next-day" aria-label="Próximo Dia"><i class="bi bi-chevron-right"></i></button>
+                <span id="data-atual" class="fw-bold text-dark agenda-date-display"><%= formattedDate %></span>
+            </div>
+            
+            <button class="btn btn-outline-secondary btn-sm" style="height: fit-content;"><i class="bi bi-printer me-1"></i> Imprimir</button>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-2">
+                
+                <div class="card mb-2 border-0 shadow-sm agenda-card">
+                    <div class="card-body p-2 calendar-sim">
+                        <div class="d-flex justify-content-between align-items-center mb-1 agenda-calendar-header">
+                            <span class="fw-bold text-primary" id="calendar-title">Outubro de 2025</span>
+                            <div>
+                                <button class="btn btn-sm p-0 me-1 text-muted" id="prev-month-btn" aria-label="Mês Anterior">&lt;</button>
+                                <button class="btn btn-sm p-0 text-muted" id="next-month-btn" aria-label="Próximo Mês">&gt;</button>
+                            </div>
+                        </div>
+                        
+                        <table class="table table-sm table-borderless text-center mb-0 agenda-calendar-table">
+                            <thead class="day-header">
+                                <tr><th>D</th><th>S</th><th>T</th><th>Q</th><th>Q</th><th>S</th><th>S</th></tr>
+                            </thead>
+                            <tbody id="calendar-body">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <% if (user.role === "MEDICO") { %> 
+                <div class="card mb-3 border-0 shadow-sm agenda-card">
+                    <div class="card-header bg-primary text-white fw-bold d-flex justify-content-between align-items-center p-2 agenda-sidebar-header">
+                        Minha Escala
+                        <button class="btn btn-sm btn-light py-0 px-1" 
+                                data-bs-toggle="modal" data-bs-target="#escalaModal"
+                                aria-label="Gerenciar Escala">
+                            <i class="bi bi-pencil-square fs-6"></i>
+                        </button>
+                        
+                    </div>
+                    <div class="card-body p-2 text-center agenda-tasks-body">
+                        <p class="text-muted small mb-0">
+                            Defina seus horários fixos de trabalho (Ex: 8:00 - 18:00).
+                        </p>
+                    </div>
+                </div>
+                <% } %>
+                <div class="card border-0 shadow-sm agenda-card mt-3">
+                    <div class="card-header bg-light border-bottom fw-bold p-2 agenda-sidebar-header">
+                        Consultas do dia
+                    </div>
+                    <div class="card-body p-2" id="resumo-consultas-list">
+                        <p class="text-muted small mb-0">Carregando consultas...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-7 border bg-white agenda-main-area shadow-sm">
+                <div id="agenda-horarios">
+                    <div class="text-center p-5 text-muted">
+                        <i class="bi bi-arrow-clockwise spin me-2"></i>Carregando agenda...
+                    </div>
+                </div>
+                
+                <div class="mt-2 fw-bold p-2 text-end agenda-summary">
+                    Total de agendamentos no dia: <span id="total-agendamentos">0</span>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0 agenda-card" id="horarios-livres-card">
+                    <div class="card-header bg-light fw-bold agenda-sidebar-header">Próximos horários livres</div>
+                    <div class="card-body" id="horarios-livres">
+                        <p class="text-muted small text-center mt-3" id="loading-horarios">Carregando horários...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="novaConsultaModal" tabindex="-1" aria-labelledby="novaConsultaModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="novaConsultaModalLabel"><i class="bi bi-calendar-plus me-2"></i>Agendar Nova Consulta</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="form-nova-consulta">
+                    <div class="modal-body">
+                        
+                        <div class="mb-3">
+                            <label for="paciente-select" class="form-label">Nome do Paciente</label>
+                            <input 
+                                class="form-control" 
+                                list="pacientes-datalist" 
+                                id="paciente-select" 
+                                autocomplete="off"
+                                placeholder="Digite para buscar ou adicionar um novo paciente..."
+                                required
+                            >
+                            <datalist id="pacientes-datalist">
+                            </datalist>
+                        </div>
+    
+                        <div class="mb-3">
+                            <label for="paciente-cpf" class="form-label">CPF</label>
+                            <input type="text" class="form-control" id="paciente-cpf" placeholder="Apenas números (obrigatório)" required>
+                        </div>
+    
+                        <div class="mb-3">
+                            <label for="paciente-endereco" class="form-label">Endereço (Opcional)</label>
+                            <input type="text" class="form-control" id="paciente-endereco" placeholder="Rua, número, cidade">                        </div>
+    
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label for="data-consulta" class="form-label">Data</label>
+                                <input type="date" class="form-control" id="data-consulta" required>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label for="hora-consulta" class="form-label">Hora</label>
+                                <input type="time" class="form-control" id="hora-consulta" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="tipo-consulta" class="form-label">Tipo de Consulta</label>
+                            <select class="form-select" id="tipo-consulta" required>
+                                <option value="">Selecione...</option>
+                                <option value="Rotina">Rotina</option>
+                                <option value="Retorno">Retorno</option>
+                                <option value="Emergência">Emergência</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-success"><i class="bi bi-save me-1"></i>Salvar Agendamento</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="escalaModal" tabindex="-1" aria-labelledby="escalaModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="escalaModalLabel"><i class="bi bi-clock-history me-2"></i>Gerenciar Escala de Trabalho</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small">Defina o período de trabalho padrão para cada dia da semana. Você pode configurar vários turnos para o mesmo dia (ex: manhã e tarde) adicionando novos registros.</p>
+                    
+                    <div id="escala-table-container">
+                        <table class="table table-bordered table-striped" id="escala-table">
+                            <thead>
+                                <tr>
+                                    <th>Dia da Semana</th>
+                                    <th>Início (HH:MM)</th>
+                                    <th>Fim (HH:MM)</th>
+                                    <th>Duração (Min)</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="escala-table-body">
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">Carregando escalas...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <button class="btn btn-sm btn-outline-primary mt-3" id="add-escala-row">
+                        <i class="bi bi-plus-circle me-1"></i> Adicionar Regra de Horário
+                    </button>
+                    
+                </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                        <button type="button" class="btn btn-primary" id="save-all-escalas-btn">
+                            <i class="bi bi-save"></i> Salvar Todas as Escalas
+                        </button>
+                    </div>
+                </div>
+        </div>
+    </div>
+
+
+<div class="modal fade" id="pacienteDetailModal" tabindex="-1" aria-labelledby="pacienteDetailModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl"> <div class="modal-content">
+      <div class="modal-header bg-primary text-white"> <h5 class="modal-title" id="pacienteDetailModalLabel">Detalhes do Agendamento</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0"> <div id="modal-content-area">
+          <p class="text-center text-muted p-5">Carregando dados...</p>
+        </div>
+      </div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-success" id="btn-iniciar-atendimento">
+        <i class="bi bi-play-circle me-1"></i> Iniciar Atendimento
+    </button>
+    
+    <button type="button" class="btn btn-danger me-auto" id="btn-cancelar-agendamento-footer">
+        <i class="bi bi-x-octagon me-1"></i> Cancelar Agendamento
+    </button>
+
+    <button type="button" class="btn btn-info" id="btn-editar-agendamento">
+        <i class="bi bi-pencil-square me-1"></i> Editar Agendamento
+    </button>
+
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+</div>
+    </div>
+  </div>
+</div>

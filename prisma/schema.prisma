@@ -1,0 +1,85 @@
+// npx prisma studio
+// npx prisma migrate dev --name
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  MEDICO
+  ADMIN
+  RECEPCIONISTA
+}
+
+model User {
+  id               Int                @id @default(autoincrement())
+  nome             String
+  email            String             @unique
+  senha            String
+  role             UserRole           @default(MEDICO)
+  crm              String?            @unique
+  especialidade    String?
+  criadoEm         DateTime           @default(now())
+  agendasAtendidas Agenda[]           @relation("AgendamentoMedico")
+  escalas          EscalaTrabalho[]
+  agendasCriadas   Agenda[]           @relation("AgendamentoCriadoPor")
+}
+
+model Paciente {
+  id          Int      @id @default(autoincrement())
+  nome        String
+  cpf         String   @unique
+  nascimento  DateTime
+  telefone    String?
+  endereco    String?
+  email       String?
+  agendas     Agenda[]
+}
+
+enum StatusAgenda {
+  Agendado
+  Confirmado
+  Atendido
+  Cancelado
+  Faltou
+}
+
+model Agenda {
+  id             Int          @id @default(autoincrement())
+  pacienteId     Int
+  medicoId       Int          // ID do User com role = MEDICO
+  data           DateTime
+  tipoConsulta   String
+  status         StatusAgenda @default(Agendado)
+  observacoes    String?
+  criadoPor      Int
+  criadoEm       DateTime     @default(now())
+  
+  paciente       Paciente     @relation(fields: [pacienteId], references: [id])
+  medico         User         @relation("AgendamentoMedico", fields: [medicoId], references: [id])
+  criador        User         @relation("AgendamentoCriadoPor", fields: [criadoPor], references: [id])
+}
+
+model EscalaTrabalho {
+  id              Int      @id @default(autoincrement())
+  medicoId        Int     
+  diaSemana       Int
+  horaInicio      String
+  horaFim         String
+  duracaoConsulta Int      @default(30)
+  ativo           Boolean  @default(true)  
+  medico          User     @relation(fields: [medicoId], references: [id])
+  @@index([medicoId, diaSemana])  
+}
+
+model Session {
+  id        String   @id @default(cuid()) // O session ID
+  sid       String   @unique
+  data      String   // O conteúdo serializado da sessão (onde ficam os dados, incluindo o userId)
+  expiresAt DateTime
+}

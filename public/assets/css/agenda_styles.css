@@ -1,0 +1,450 @@
+/*
+ * AGENDA STYLES - Versão Final e Otimizada
+ * Foco: Layout de 3 Colunas, Scroll da Agenda Principal e Divisão Clara dos Slots.
+ */
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f7fa; /* Fundo suave */
+    color: #333;
+}
+
+/* ------------------------------------------------ */
+/* 1. NAVBAR E HEADER PRINCIPAL (Visual Moderno) */
+/* ------------------------------------------------ */
+
+.prontmed-navbar {
+    background-color: #003057; /* Azul Escuro (Cor primária forte) */
+    padding: 0.75rem 2rem; /* Aumenta o padding vertical e horizontal */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Sombra mais profunda e suave */
+}
+
+.prontmed-navbar .logo {
+    font-size: 1.6rem;
+    color: #00CCBB; /* Ciano/Verde de destaque (Mantido) */
+    font-weight: 800; /* Deixa o logo mais forte */
+    letter-spacing: -0.5px; /* Pequeno ajuste no espaçamento */
+}
+
+/* Links de Navegação */
+.prontmed-navbar .nav-link {
+    color: #e6e6e6; /* Cor ligeiramente mais clara para melhor contraste */
+    padding: 0.5rem 1rem;
+    margin: 0 8px; /* Mais espaço entre os links */
+    border-radius: 8px; /* Bordas mais suaves */
+    font-weight: 500;
+    transition: background-color 0.2s, color 0.2s;
+    position: relative; /* Para o efeito de sublinhado */
+}
+
+/* Efeito Hover nos Links */
+.prontmed-navbar .nav-link:hover {
+    color: #ffffff; /* Brilha no hover */
+    background-color: transparent; /* Remove o fundo no hover (Foco no sublinhado) */
+}
+.prontmed-navbar .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 10%;
+    width: 80%;
+    height: 3px;
+    background-color: #00CCBB; /* Cor de destaque no sublinhado */
+    transform: scaleX(0); /* Escondido por padrão */
+    transition: transform 0.3s ease-out;
+    border-radius: 2px;
+}
+.prontmed-navbar .nav-link:hover::after,
+.prontmed-navbar .nav-link.active::after {
+    transform: scaleX(1); /* Exibe no hover e ativo */
+}
+
+/* Estilo do Link Ativo (Foco no sublinhado) */
+.prontmed-navbar .nav-link.active {
+    color: #ffffff;
+    background-color: transparent; /* Remove o fundo */
+    font-weight: 600;
+}
+
+
+/* Campo de Busca (Search) */
+.prontmed-search {
+    background-color: rgba(255, 255, 255, 0.15); /* Fundo semi-transparente/claro */
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    font-size: 0.9rem;
+    height: 40px; /* Levemente mais alto */
+    width: 280px !important; /* Aumenta um pouco a largura */
+    border-radius: 6px; /* Ajusta o border-radius para combinar */
+    transition: all 0.3s;
+}
+.prontmed-search:focus {
+    background-color: white;
+    color: #333;
+    border-color: #00CCBB;
+    box-shadow: 0 0 0 0.25rem rgba(0, 204, 187, 0.25);
+}
+.prontmed-search::placeholder {
+    color: #a0a0a0; /* Placeholder mais visível */
+}
+
+/* Dropdown do Perfil/Ícone */
+.dropdown .bi-person-circle {
+    font-size: 1.8rem !important; /* Ícone um pouco maior */
+    color: #f1f1f1;
+    transition: color 0.2s;
+}
+.dropdown .bi-person-circle:hover {
+    color: #00CCBB; /* Ícone de perfil com destaque no hover */
+}
+/* ------------------------------------------------ */
+/* ESTILOS DO CARD DE SUGESTÕES (AUTOCOMPLETE) - ULTRA PROFISSIONAL */
+/* ------------------------------------------------ */
+
+.prontmed-search-container {
+    position: relative;
+    z-index: 1050; 
+}
+
+.prontmed-suggestions-card {
+    min-width: 450px; /* Levemente mais largo para mais detalhes */
+    border-radius: 8px;
+    padding: 0;
+    margin-top: 6px; 
+    border: none;
+    background-color: #ffffff; 
+    box-shadow: 0 8px 30px rgba(0, 48, 87, 0.15); /* Sombra mais azulada e elegante */
+    overflow: hidden; 
+    max-height: 400px; /* Limita a altura para evitar que ocupe a tela toda */
+    overflow-y: auto; /* Adiciona scroll se necessário */
+    animation: fadeIn 0.3s ease-out; /* Animação de entrada suave */
+}
+
+/* * ESTILO DO ITEM INDIVIDUAL (O segredo do visual profissional) 
+ */
+.paciente-suggestion-item {
+    display: grid;
+    /* Divide o item em 3 colunas: Nome(Largo) | CPF(Médio) | Telefone(Curto) */
+    grid-template-columns: 2fr 1.5fr 1fr; 
+    gap: 10px;
+    align-items: center;
+    padding: 12px 18px; /* Padding generoso */
+    border-bottom: 1px solid #f0f0f0; 
+    color: #333;
+    transition: background-color 0.2s, transform 0.1s;
+    cursor: pointer;
+}
+
+/* Efeito Hover: Subtileza e Elevação */
+.paciente-suggestion-item:hover {
+    background-color: #f7f9fb; /* Fundo quase imperceptível */
+    transform: translateY(-1px); /* Pequena elevação 3D */
+}
+
+/* Nome do Paciente: Foco primário */
+.paciente-suggestion-item .name {
+    font-weight: 600; 
+    font-size: 1rem;
+    color: #003057; /* Azul Escuro */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* Destaque sutil com a cor da marca */
+    position: relative;
+    padding-left: 10px;
+}
+.paciente-suggestion-item .name::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 100%;
+    background-color: #00CCBB; /* Barra fina de destaque */
+    opacity: 0; /* Escondida por padrão */
+    transition: opacity 0.2s;
+    border-radius: 2px;
+}
+.paciente-suggestion-item:hover .name::before {
+    opacity: 1;
+}
+
+
+/* Detalhes (CPF e Telefone): Alinhados e Secundários */
+.paciente-suggestion-item .details {
+    font-size: 0.85rem;
+    color: #6c757d; 
+    text-align: right; /* Alinha os detalhes à direita dentro da sua célula */
+}
+
+.paciente-suggestion-item .details span {
+    display: inline-block; /* Permite que o label e o valor fiquem lado a lado */
+    margin-left: 15px; 
+}
+.paciente-suggestion-item .details strong {
+    font-weight: 500;
+    color: #495057; /* Cor mais forte para o valor (CPF, Telefone) */
+}
+
+
+/* Estilo para a mensagem de erro/vazio */
+.prontmed-suggestions-card .dropdown-item {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+/* Animação de entrada */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ------------------------------------------------ */
+/* 2. AGENDA PRINCIPAL (COLUNA CENTRAL - 7) */
+/* ------------------------------------------------ */
+
+.agenda-main-area {
+    /* Altura que permite o scroll dentro da coluna 7 */
+    height: calc(100vh - 180px); 
+    overflow-y: auto; 
+    
+    border-radius: 10px; 
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); 
+    padding: 0; 
+    border: none !important; 
+    background-color: #fff;
+}
+
+/* Rodapé de resumo da agenda (colocado no HTML FORA do scroll, mas estilizado) */
+.agenda-summary {
+    background-color: #ffffff; 
+    border-top: 2px solid #007bff; 
+    font-size: 0.95rem;
+}
+
+/* Estilo da Tabela de Horários */
+.agenda-table {
+    width: 100%;
+    /* ESSENCIAL: Garante que a largura da coluna seja respeitada */
+    table-layout: fixed; 
+    border-collapse: collapse; 
+    margin-bottom: 0;
+}
+
+.agenda-row {
+    height: 50px; /* Altura de cada slot */
+    border-bottom: 1px solid #e0e0e0; /* LINHA DIVISÓRIA CLARA */
+    transition: background-color 0.1s;
+}
+.agenda-row:last-child {
+    border-bottom: none;
+}
+.agenda-row:hover:not(.slot-occupied) {
+    background-color: #eaf2ff; /* Azul suave no hover */
+    cursor: pointer;
+}
+
+/* Célula da Hora (Coluna 1) */
+.time-label-cell {
+    width: 70px; 
+    text-align: right;
+    padding-right: 15px !important;
+    color: #8c9096; 
+    font-weight: 500; 
+    font-size: 0.85rem;
+    
+    /* LINHA VERTICAL separando a hora do agendamento */
+    border-right: 1px solid #f0f0f0; 
+    border-bottom: none; /* A linha horizontal é na TR */
+    vertical-align: middle;
+}
+
+/* Célula de Conteúdo (Coluna 2) */
+.agenda-content-cell {
+    padding: 0 !important; 
+    border-bottom: none;
+    vertical-align: middle;
+}
+
+/* Div interna que contém o agendamento (para alinhamento flex) */
+.agenda-content-area {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center; /* Centraliza verticalmente */
+    padding: 0 15px; 
+}
+
+/* Estilo do Agendamento (compromisso) */
+.agenda-compromisso {
+    padding: 4px 8px;
+    font-size: 0.85rem;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 95%;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+.agenda-compromisso:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* ------------------------------------------------ */
+/* 3. SIDEBAR ESQUERDA (MINI-CALENDÁRIO E ESCALA) */
+/* ------------------------------------------------ */
+
+.agenda-card {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.agenda-sidebar-header {
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+/* Mini Calendário (Correção de Tabela) */
+.calendar-sim {
+    padding: 0.5rem !important;
+    line-height: 1; 
+}
+.agenda-calendar-header {
+    padding: 0 0.2rem 0.5rem 0.2rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+.agenda-calendar-table {
+    /* ESSENCIAL: Garante que as colunas tenham o mesmo tamanho */
+    table-layout: fixed; 
+    width: 100%;
+    margin-bottom: 0 !important;
+}
+.agenda-calendar-table th {
+    font-size: 0.7rem;
+    color: #6c757d;
+    padding: 0.3rem 0 !important; 
+    font-weight: 600;
+}
+.calendar-sim .day-number {
+    display: inline-block;
+    width: 28px; 
+    height: 28px;
+    line-height: 28px;
+    text-align: center;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+.calendar-sim .day-number.selected {
+    background-color: #007bff;
+    color: white;
+    font-weight: 700;
+}
+.calendar-sim .day-number.has-appointment {
+    border: 1px solid #28a745;
+    color: #28a745;
+}
+
+/* ------------------------------------------------ */
+/* 4. SIDEBAR DIREITA (HORÁRIOS LIVRES) */
+/* ------------------------------------------------ */
+
+#horarios-livres-card .card-header {
+    background-color: #007bff; 
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.horario-btn {
+    font-size: 0.85rem;
+    padding: 6px 10px;
+    margin: 5px 3px;
+    border: 1px solid #007bff !important;
+    color: #007bff !important;
+    background-color: #fff;
+    border-radius: 4px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.horario-btn:hover {
+    background-color: #007bff;
+    color: white !important;
+}
+
+/* Utilitário de animação */
+.spin {
+    animation: spin 2s linear infinite;
+}
+
+
+/* --- Estilos para o Dropdown Customizado de Sugestões --- */
+
+.autocomplete-container {
+    position: relative;
+    /* Garante que o dropdown fique acima de outros elementos */
+    z-index: 1000; 
+}
+
+.paciente-suggestions-dropdown {
+    display: none; /* Escondido por padrão, o JS irá mostrar */
+    position: absolute;
+    top: 100%; /* Posiciona logo abaixo do input */
+    left: 0;
+    right: 0;
+    max-height: 250px;
+    overflow-y: auto; /* Adiciona scroll se a lista for longa */
+    border: 1px solid #dee2e6;
+    border-top: none;
+    border-radius: 0 0 0.5rem 0.5rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    padding: 0; /* Remove padding padrão do ul/dropdown-menu */
+    margin-top: -1px; /* Para que pareça 'colado' no input */
+}
+
+/* Força a exibição para testes ou quando o JS usa .show-suggestions */
+.paciente-suggestions-dropdown.show-suggestions {
+    display: block !important;
+}
+
+.paciente-suggestions-dropdown .dropdown-item {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.95rem;
+    border-bottom: 1px solid #f8f9fa; /* Linha divisória sutil */
+}
+
+/* Estilo do item de sugestão ao passar o mouse */
+.paciente-suggestions-dropdown .dropdown-item:hover,
+.paciente-suggestions-dropdown .dropdown-item.active {
+    background-color: #e9ecef; /* Fundo cinza claro */
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+/* Estilo para os detalhes (CPF) */
+.paciente-suggestions-dropdown .details {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--color-secondary);
+    font-weight: 400;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

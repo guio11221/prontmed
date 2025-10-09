@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pacientes</title>
+</head>
+<body>
+  <h1>Lista de Pacientes</h1>
+  <ul>
+    <% pacientes.forEach(p => { %>
+      <li><%= p.nome %> - <%= p.cpf %></li>
+    <% }) %>
+  </ul>
+</body>
+</html>

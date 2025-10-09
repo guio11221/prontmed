@@ -1,0 +1,160 @@
+<nav class="prontmed-navbar d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center">
+        <span class="logo me-4">prontmed</span>
+        <div class="dropdown prontmed-search-container">
+            <input type="text" class="form-control prontmed-search" placeholder="buscar pacientes"
+                id="search-paciente-input" autocomplete="off" data-bs-toggle="dropdown" aria-expanded="false"
+                style="width: 300px;">
+            <ul class="dropdown-menu dropdown-menu-dark prontmed-suggestions-card"
+                aria-labelledby="search-paciente-input" id="paciente-suggestions-list">
+            </ul>
+        </div>
+    </div>
+    <div class="d-flex align-items-center nav-links-container">
+        <a href="/agenda" class="nav-link" data-path="agenda">agenda</a> 
+        <a href="/pacientes" class="nav-link" data-path="pacientes">pacientes</a>
+        <a href="/relatorios" class="nav-link" data-path="relatorios">relatórios</a>
+
+        <% if (user.role==="ADMIN" ) { %>
+            <a href="/medicos" class="nav-link" data-path="medicos">médicos</a>
+            <a href="/usuarios" class="nav-link" data-path="usuarios">usuários</a>
+        <% } %>
+
+        <a href="/recursos" class="nav-link" data-path="recursos">recursos</a>
+
+        <div class="dropdown ms-3">
+            <a href="#" class="text-white text-decoration-none" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-person-circle fs-5"></i>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuLink">
+                <li>
+                    <h6 class="dropdown-header">
+                        <%= user.nome %>
+                    </h6>
+                </li>
+                <li><a class="dropdown-item" href="/perfil">Meu Perfil</a></li>
+                <% if (user.role==="ADMIN" ) { %>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li><a class="dropdown-item" href="/admin/config">Configurações</a></li>
+                <% } %>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <li><a class="dropdown-item text-danger" href="/logout">Sair</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const input = document.getElementById('search-paciente-input');
+        const suggestionsList = document.getElementById('paciente-suggestions-list');
+        let searchTimeout;
+
+        // =========================================================
+        // 1. Marcação da Página Atual (Ativar Link do Menu)
+        // =========================================================
+        const highlightCurrentPage = () => {
+            // Obtém o primeiro segmento da URL após o domínio (ex: 'pacientes' de '/pacientes/123/ficha')
+            const pathSegments = window.location.pathname.split('/');
+            const rootPath = pathSegments[1] || 'agenda'; // Usa 'agenda' se for a raiz (/)
+            
+            const navLinks = document.querySelectorAll('.nav-links-container .nav-link');
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                
+                const linkPath = link.getAttribute('data-path'); 
+
+                // A marcação ativa será baseada APENAS no primeiro segmento da URL
+                if (linkPath === rootPath) {
+                    link.classList.add('active');
+                }
+            });
+        };
+
+        highlightCurrentPage();
+
+        // =========================================================
+        // 2. Lógica de Busca de Pacientes (Busca e Renderização)
+        // =========================================================
+
+        const fetchSuggestions = async (query) => {
+            if (query.length < 3) {
+                // Esconde se a busca for muito curta
+                bootstrap.Dropdown.getOrCreateInstance(input.parentElement).hide();
+                return;
+            }
+            
+            // Exibe mensagem de carregamento
+            suggestionsList.innerHTML = `<li><a class="dropdown-item disabled">Carregando...</a></li>`;
+            bootstrap.Dropdown.getOrCreateInstance(input.parentElement).show();
+
+
+            try {
+                const response = await fetch(`/pacientes/search?q=${encodeURIComponent(query)}`);
+                const pacientesData = await response.json();
+                
+                renderSuggestions(pacientesData.pacientes || []); 
+
+            } catch (error) {
+                console.error('Erro ao buscar pacientes:', error);
+                suggestionsList.innerHTML = `<li><a class="dropdown-item text-danger">Falha na conexão ou API.</a></li>`;
+            }
+        };
+
+        // Função para renderizar os resultados no dropdown (UX melhorada)
+        const renderSuggestions = (pacientes) => {
+            suggestionsList.innerHTML = ''; // Limpa a lista
+            const dropdown = bootstrap.Dropdown.getOrCreateInstance(input.parentElement);
+
+            if (pacientes.length === 0) {
+                suggestionsList.innerHTML = `<li><a class="dropdown-item disabled">Nenhum paciente encontrado.</a></li>`;
+                dropdown.show();
+                return;
+            }
+
+            pacientes.forEach(paciente => {
+                const li = document.createElement('li');
+                // Assume que paciente.id existe e será usado na rota
+                const newRoute = `/pacientes/${paciente.id}/ficha`; // Sugestão: ir para a ficha
+
+                // Estrutura de sugestão com detalhes lado a lado (inline-block)
+                li.innerHTML = `
+                    <a class="dropdown-item paciente-suggestion-item" href="${newRoute}">
+                        <div class="name">${paciente.nome}</div>
+                        <div class="details-row">
+                            <span class="details">CPF: <strong>${paciente.cpf}</strong></span>
+                        </div>
+                    </a>
+                `;
+                suggestionsList.appendChild(li);
+            });
+
+            // Mostra o dropdown
+            dropdown.show();
+        };
+
+        // Evento de digitação com Debounce
+        input.addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            clearTimeout(searchTimeout);
+
+            searchTimeout = setTimeout(() => {
+                fetchSuggestions(query);
+            }, 300);
+        });
+        
+        // Opcional: Esconder as sugestões quando o usuário clica fora
+        document.addEventListener('click', (e) => {
+            // Garante que o click não foi dentro do input ou do dropdown
+            if (!input.parentElement.contains(e.target)) {
+                bootstrap.Dropdown.getOrCreateInstance(input.parentElement).hide();
+            }
+        });
+    });
+</script>
