@@ -29,7 +29,7 @@ O OpenPront é um sistema inovador e de código aberto, projetado para revolucio
 Aqui você pode ver algumas das interfaces do OpenPront em ação.
 
 ### Tela de Login
-![Tela de Login](docs/images/login/img.png)
+![Tela de Login](docs/images/login/img_1.png)
 
 [//]: # (### Tela de Agendamento)
 
