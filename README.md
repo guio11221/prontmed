@@ -19,6 +19,11 @@ O OpenPront é um sistema de gestão de prontuários eletrônicos e agendamento 
 *   **Frontend:** EJS (Embedded JavaScript), HTML5, CSS3, JavaScript
 *   **Outras Ferramentas:** Git, npm/yarn
 
+## Telas do Sistema
+
+### Tela de Login
+![Tela de Login](docs/images/login/img.png)
+
 ## Como Configurar e Rodar o Projeto
 
 Siga os passos abaixo para configurar e executar o OpenPront em seu ambiente local.
