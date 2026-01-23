@@ -838,7 +838,7 @@ class AgendaManager {
     }
 
 
-    // --- NAVEGAÇÃO E CARREGAMENTO DE DADOS ---
+    // --- NAVEGAÇÃO E CARREGAMENTO DE DATA ---
 
     changeDay(days) {
         this.currentViewDate.setDate(this.currentViewDate.getDate() + days);
@@ -1232,8 +1232,8 @@ class AgendaManager {
                 btnIniciarAtendimento.replaceWith(btnIniciarAtendimento.cloneNode(true));
                 document.getElementById('btn-iniciar-atendimento').addEventListener('click', () => {
                     modal.hide();
-                    const novaRota = `/atendimento/iniciar?agendamentoId=${agendamento.id}&pacienteId=${agendamento.paciente.id}`;
-                    window.location.href = novaRota;
+                    const novaRota = `/atendimento?pacienteId=${agendamento.pacienteId}&dataAtendimento=${agendamento.data}`;
+                    window.open(novaRota, '_blank');
                 });
 
                 btnCancelarAgendamento.style.display = 'block';

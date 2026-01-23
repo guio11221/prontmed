@@ -132,7 +132,6 @@ export default class AgendaController {
                     medicoId: parseInt(medicoId),
                     data: new Date(data),
                     tipoConsulta: tipoConsulta || 'Consulta Padrão',
-                    observacoes: observacoes || '',
                     status: status || 'Agendado',
                     criadoPor: req.user.id
                 },
