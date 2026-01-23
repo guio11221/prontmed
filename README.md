@@ -109,4 +109,4 @@ Para dúvidas, sugestões ou colaborações, entre em contato com Guilherme.
 
 ---
 
-**Desenvolvido com ❤️ por [Guilherme](https://github.com/guio11221)**
+**Desenvolvido por [Guilherme](https://github.com/guio11221)**
