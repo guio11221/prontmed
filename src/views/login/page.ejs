@@ -1,238 +1,489 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OpenPront | Acesso</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenPront | Acesso Inteligente</title>
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-<style>
-/* Estilos mantidos (apenas pequenas otimizações) */
-body {
-    margin: 0;
-    height: 100vh;
-    display: flex;
-    font-family: 'Inter', sans-serif;
-    overflow: hidden;
-}
+    <style>
+        :root {
+            --brand-primary: #0061ff;
+            --brand-secondary: #60efff;
+            --dark-blue: #002b5c;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --bg-light: #f8fafc;
+            --white: #ffffff;
+            --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-/* Lado da imagem */
-.side-image {
-    flex: 1;
-    background: url('https://source.unsplash.com/1600x900/?health,technology,abstract') center/cover no-repeat;
-    position: relative;
-}
-.side-image::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 123, 255, 0.4);
-}
-.side-image .overlay {
-    position: relative;
-    z-index: 2;
-    color: #fff;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    padding: 2rem;
-}
-.overlay h1 { font-size: 3rem; font-weight: 700; margin-bottom: 1rem; text-shadow: 0 2px 5px rgba(0,0,0,0.3);}
-.overlay p { font-size: 1.2rem; max-width: 400px; line-height: 1.5; opacity: 0.9; }
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-main);
+            overflow: hidden;
+        }
 
-/* Lado do login */
-.login-side {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: #fff;
-    position: relative;
-    overflow: hidden;
-}
+        .side-visual {
+            flex: 1.2;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--dark-blue);
+        }
 
-/* Área animada do formulário */
-.forms-container {
-    position: relative;
-    width: 100%;
-    max-width: 380px;
-    display: flex;
-    align-items: center;
-    min-height: 400px;
-}
+        .visual-image {
+            position: absolute;
+            inset: 0;
+            background-image: url('https://images.unsplash.com/photo-1622253692010-333f2da6031d?q=80&w=1964&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.6;
+            filter: grayscale(20%);
+        }
 
-/* Tela de login e recuperação */
-.form-panel {
-    position: absolute;
-    width: 100%;
-    top: 50%;
-    transform: translateY(-50%);
-    transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
-}
+        .visual-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(0, 97, 255, 0.8) 0%, rgba(0, 43, 92, 0.9) 100%);
+            z-index: 1;
+        }
 
-.form-panel.hidden-left { transform: translate(-100%, -50%); opacity: 0; }
-.form-panel.hidden-right { transform: translate(100%, -50%); opacity: 0; }
-.form-panel.visible { transform: translate(0, -50%); opacity: 1; }
+        .visual-content {
+            position: relative;
+            z-index: 2;
+            padding: 4rem;
+            color: var(--white);
+            max-width: 600px;
+        }
 
-h2 { font-weight: 700; margin-bottom: 1.5rem; text-align: center; }
-.form-control { height: 50px; border-radius: 8px; padding-left: 2.8rem; }
-.form-group { position: relative; margin-bottom: 1.2rem; }
-.form-group .bi { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #6c757d; }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-/* Botões com novo estilo */
-.btn-auth {
-    width: 100%;
-    padding: 0.9rem;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 1rem;
-    transition: all 0.2s;
-    margin-bottom: 0.75rem; /* Espaçamento entre botões */
-}
+        .visual-content h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            letter-spacing: -1px;
+            animation: fadeInUp 0.8s ease-out forwards;
+            opacity: 0;
+        }
 
-/* Estilo para Login Google */
-.btn-google {
-    background: #fff;
-    color: #444;
-    border: 1px solid #ccc;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-.btn-google:hover {
-    background: #f1f1f1;
-    border-color: #aaa;
-    transform: translateY(-2px);
-}
-.google-icon {
-    width: 90px;
-    height: 30px;
-    margin-right: 10px;
-    vertical-align: middle;
-}
+        .visual-content p {
+            font-size: 1.25rem;
+            opacity: 0;
+            line-height: 1.6;
+            border-left: 4px solid var(--brand-secondary);
+            padding-left: 1.5rem;
+            animation: fadeInUp 0.8s ease-out 0.3s forwards;
+        }
 
-/* Estilo para Login Padrão/Recuperação */
-.btn-primary-auth {
-    background: #007bff;
-    color: #fff;
-}
-.btn-primary-auth:hover {
-    background: #0056b3;
-    transform: translateY(-2px);
-}
+        .login-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--white);
+            position: relative;
+            z-index: 10;
+            box-shadow: -10px 0 50px rgba(0,0,0,0.05);
+        }
 
-.text-secondary a { color: #007bff; text-decoration: none; cursor: pointer; }
-.text-secondary a:hover { text-decoration: underline; }
+        .login-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 4rem;
+            max-width: 520px;
+            margin: 0 auto;
+            width: 100%;
+        }
 
-/* Separador "Ou" */
-.separator {
-    display: flex;
-    align-items: center;
-    text-align: center;
-    margin: 1.5rem 0;
-    color: #aaa;
-}
-.separator::before,
-.separator::after {
-    content: '';
-    flex: 1;
-    border-bottom: 1px solid #ddd;
-}
-.separator:not(:empty)::before {
-    margin-right: .25em;
-}
-.separator:not(:empty)::after {
-    margin-left: .25em;
-}
+        .brand-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--brand-primary);
+            margin-bottom: 3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-@media (max-width: 992px) {
-    body { flex-direction: column; }
-    .side-image { height: 35vh; flex: none; }
-    .login-side { height: 65vh; padding: 2rem; }
-}
-</style>
+        .form-header h2 {
+            font-weight: 700;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+        }
+
+        .form-header p {
+            color: var(--text-muted);
+            margin-bottom: 2.5rem;
+        }
+
+        .panels-container {
+            position: relative;
+            min-height: 350px;
+        }
+
+        .form-panel {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            transition: var(--transition-smooth);
+            visibility: hidden;
+            opacity: 0;
+        }
+
+        .form-panel.active {
+            visibility: visible;
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .form-panel.to-left { transform: translateX(-50px); opacity: 0; }
+        .form-panel.to-right { transform: translateX(50px); opacity: 0; }
+
+        .input-group-custom {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group-custom label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper > i:first-child {
+            position: absolute;
+            left: 1.25rem;
+            color: var(--text-muted);
+            transition: var(--transition-smooth);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .form-control-custom {
+            width: 100%;
+            padding: 0.85rem 3.5rem 0.85rem 3.2rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            background: #f8fafc;
+            transition: var(--transition-smooth);
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .form-control-custom:focus {
+            outline: none;
+            border-color: var(--brand-primary);
+            background: var(--white);
+            box-shadow: 0 0 0 4px rgba(0, 97, 255, 0.1);
+        }
+
+        .form-control-custom:focus + i {
+            color: var(--brand-primary);
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 1.25rem;
+            background: none;
+            border: none;
+            padding: 0;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition-smooth);
+            z-index: 10;
+        }
+
+        .password-toggle:hover {
+            color: var(--brand-primary);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 1.1rem;
+            background: var(--brand-primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1rem;
+            margin-top: 1rem;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-submit:hover {
+            background: var(--dark-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 43, 92, 0.2);
+        }
+
+        .login-footer {
+            padding: 2rem 4rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        .link-action {
+            color: var(--brand-primary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition-smooth);
+        }
+
+        .link-action:hover {
+            color: var(--dark-blue);
+            text-decoration: underline;
+        }
+
+        @media (max-width: 1100px) {
+            .visual-content h1 { font-size: 3rem; }
+            .login-wrapper { padding: 2rem; }
+        }
+
+        @media (max-width: 992px) {
+            body { flex-direction: column; overflow-y: auto; }
+            .side-visual { min-height: 300px; flex: none; }
+            .visual-content { padding: 2rem; }
+            .visual-content h1 { font-size: 2.2rem; }
+            .login-section { flex: 1; border-radius: 30px 30px 0 0; margin-top: -40px; }
+            .login-wrapper { padding: 3rem 1.5rem; max-width: 100%; }
+            .login-footer { padding: 1.5rem; }
+        }
+    </style>
 </head>
-
 <body>
-<div class="side-image">
-    <div class="overlay">
-        <h1>OpenPront</h1>
-        <p>Gestão clínica inteligente e ágil. Organize, atenda e evolua com tecnologia.</p>
+
+<section class="side-visual">
+    <div class="visual-image"></div>
+    <div class="visual-overlay"></div>
+    <div class="visual-content">
+        <h1>Cuidado que gera conexão.</h1>
+        <p>A plataforma OpenPront une tecnologia de ponta à sensibilidade do atendimento humano para transformar sua clínica.</p>
     </div>
-</div>
+</section>
 
-<div class="login-side">
-    <div class="forms-container">
-        <div class="form-panel visible" id="loginPanel">
-            <h2>Acesso ao Sistema</h2>
-            
-            <button class="btn-auth btn-google" onclick="window.location.href='/auth/google'">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/4/4a/Logo_2013_Google.png" alt="Google" class="google-icon">
-                Entrar com Google
-            </button>
-
-            <div class="separator small">Ou</div>
-
-            <form action="/login" method="POST">
-
-                <div class="form-group">
-                    <i class="bi bi-envelope-fill"></i>
-                    <input type="email" class="form-control" name="email" placeholder="E-mail profissional" required>
-                </div>
-
-                <div class="form-group">
-                    <i class="bi bi-lock-fill"></i>
-                    <input type="password" class="form-control" name="senha" placeholder="Senha de acesso" required>
-                </div>
-
-                <button type="submit" class="btn-auth btn-primary-auth"> 
-                    <i class="bi bi-box-arrow-in-right me-1"></i> Entrar 
-                </button>
-            </form>
-            <p class="text-secondary small mt-4 text-center">Esqueceu sua senha? <a id="showRecover">Recuperar acesso</a></p>
+<section class="login-section">
+    <div class="login-wrapper">
+        <div class="brand-logo">
+            <i class="bi bi-heart-pulse-fill"></i> OpenPront
         </div>
 
-        <div class="form-panel hidden-right" id="recoverPanel">
-            <form action="/recover" method="POST">
-                <h2>Recuperar Senha</h2>
-
-                <div class="form-group">
-                    <i class="bi bi-envelope-fill"></i>
-                    <input type="email" class="form-control" name="recoverEmail" placeholder="Informe seu e-mail" required>
+        <div class="panels-container">
+            <div class="form-panel active" id="loginPanel">
+                <div class="form-header">
+                    <h2>Bem-vindo</h2>
+                    <p>Acesse sua conta para gerenciar seus pacientes.</p>
                 </div>
 
-                <button type="submit" class="btn-auth btn-primary-auth">Enviar link</button>
-            </form>
-            
-            <p class="text-secondary small mt-4 text-center">Voltar para <a id="backLogin">Login</a></p>
+                <form id="authForm">
+                    <div class="input-group-custom">
+                        <label>E-mail Profissional</label>
+                        <div class="input-wrapper">
+                            <i class="bi bi-envelope"></i>
+                            <input type="email" id="emailInput" class="form-control-custom" placeholder="nome@exemplo.com" required>
+                        </div>
+                    </div>
+
+                    <div class="input-group-custom">
+                        <label>Senha de Acesso</label>
+                        <div class="input-wrapper">
+                            <i class="bi bi-shield-lock"></i>
+                            <input type="password" id="passInput" class="form-control-custom" placeholder="••••••••" required>
+                            <button type="button" class="password-toggle" onclick="togglePassword()" aria-label="Mostrar/ocultar senha">
+                                <i class="bi bi-eye" id="toggleIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-submit" id="btnSubmit">
+                        Entrar no Sistema <i class="bi bi-arrow-right"></i>
+                    </button>
+                </form>
+
+                <div class="text-center mt-4">
+                    <span class="text-muted small">Esqueceu as credenciais?</span>
+                    <a href="javascript:void(0)" class="link-action small ms-1" onclick="switchPanel('recover')">Recuperar conta</a>
+                </div>
+            </div>
+
+            <div class="form-panel to-right" id="recoverPanel">
+                <div class="form-header">
+                    <h2>Recuperar Senha</h2>
+                    <p>Enviaremos as instruções de redefinição para o seu e-mail.</p>
+                </div>
+
+                <form id="recoverForm">
+                    <div class="input-group-custom">
+                        <label>E-mail de Cadastro</label>
+                        <div class="input-wrapper">
+                            <i class="bi bi-envelope"></i>
+                            <input type="email" id="recoverEmail" class="form-control-custom" placeholder="seuemail@provedor.com" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-submit" id="btnRecover">
+                        Enviar Link de Resgate
+                    </button>
+                </form>
+
+                <div class="text-center mt-4">
+                    <a href="javascript:void(0)" class="link-action small" onclick="switchPanel('login')">
+                        <i class="bi bi-chevron-left"></i> Voltar para o Login
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
+
+    <footer class="login-footer">
+        <div>&copy; <span id="year"></span> OpenPront Health Systems.</div>
+        <div class="mt-1 opacity-50">Tecnologia para saúde de alta performance.</div>
+    </footer>
+</section>
+
+<div id="customAlert" style="display:none; position: fixed; top: 20px; right: 20px; z-index: 9999; background: #fff; border-left: 5px solid var(--brand-primary); padding: 15px 25px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); font-size: 0.9rem; animation: fadeInUp 0.4s ease-out;">
+    <div id="alertContent"></div>
 </div>
 
 <script>
-const loginPanel = document.getElementById('loginPanel');
-const recoverPanel = document.getElementById('recoverPanel');
+    document.getElementById('year').textContent = new Date().getFullYear();
 
-document.getElementById('showRecover').addEventListener('click', (e) => {
-    e.preventDefault(); 
-    loginPanel.classList.add('hidden-left');
-    loginPanel.classList.remove('visible');
-    recoverPanel.classList.add('visible');
-    recoverPanel.classList.remove('hidden-right');
-});
+    function showAlert(msg, color = "#0061ff") {
+        const alert = document.getElementById('customAlert');
+        const content = document.getElementById('alertContent');
+        alert.style.borderLeftColor = color;
+        content.textContent = msg;
+        alert.style.display = 'block';
+        setTimeout(() => { alert.style.display = 'none'; }, 4000);
+    }
 
-document.getElementById('backLogin').addEventListener('click', (e) => {
-    e.preventDefault(); 
-    recoverPanel.classList.add('hidden-right');
-    recoverPanel.classList.remove('visible');
-    loginPanel.classList.add('visible');
-    loginPanel.classList.remove('hidden-left');
-});
+    function switchPanel(target) {
+        const login = document.getElementById('loginPanel');
+        const recover = document.getElementById('recoverPanel');
+
+        if (target === 'recover') {
+            login.classList.add('to-left');
+            login.classList.remove('active');
+            setTimeout(() => {
+                recover.classList.remove('to-right');
+                recover.classList.add('active');
+            }, 100);
+        } else {
+            recover.classList.add('to-right');
+            recover.classList.remove('active');
+            setTimeout(() => {
+                login.classList.remove('to-left');
+                login.classList.add('active');
+            }, 100);
+        }
+    }
+
+    function togglePassword() {
+        const input = document.getElementById('passInput');
+        const icon = document.getElementById('toggleIcon');
+
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.replace('bi-eye', 'bi-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.replace('bi-eye-slash', 'bi-eye');
+        }
+    }
+
+    document.getElementById('authForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const btn = document.getElementById('btnSubmit');
+        const email = document.getElementById('emailInput').value;
+        const senha = document.getElementById('passInput').value;
+
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Validando acesso...`;
+
+        try {
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, senha })
+            });
+
+            if (!response.ok) {
+                throw new Error('Credenciais inválidas');
+            }
+
+            const data = await response.json();
+
+            showAlert('Login realizado com sucesso! Redirecionando...', '#10b981');
+            window.location.href = '/agenda';
+
+        } catch (err) {
+            console.log(err)
+            showAlert('Credenciais inválidas. Verifique os dados.', '#ef4444');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    });
+
+    document.getElementById('recoverForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('btnRecover');
+        const email = document.getElementById('recoverEmail').value;
+
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Enviando...`;
+
+        setTimeout(() => {
+            showAlert(`Link de recuperação enviado para ${email}`, "#0061ff");
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+            switchPanel('login');
+        }, 2000);
+    });
 </script>
 </body>
 </html>

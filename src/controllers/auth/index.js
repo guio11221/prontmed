@@ -18,36 +18,46 @@ export default class AuthController {
 
     async login(req, res, next) {
         try {
-
             passport.authenticate("local", (err, user, info) => {
-            if (err) {
-              console.error("Erro na autenticação:", err);
-              req.flash("erro", "Erro inesperado ao tentar fazer login.");
-              return res.redirect("/login");
-            }
-    
-            if (!user) {
-              req.flash("erro", info.message); 
-              return res.redirect("/login");
-            }
-    
-            req.logIn(user, (err) => {
-              if (err) {
-                console.error("Erro ao criar sessão:", err);
-                req.flash("erro", "Erro inesperado ao tentar criar sessão.");
-                return res.redirect("/login");
-              }
-    
-              return res.redirect("/agenda");
-            });
-          })(req, res, next);
-    
+                if (err) {
+                    console.error("Erro na autenticação:", err);
+                    return res.status(500).json({
+                        success: false,
+                        message: "Erro inesperado ao tentar fazer login."
+                    });
+                }
+
+                if (!user) {
+                    return res.status(401).json({
+                        success: false,
+                        message: info?.message || "Credenciais inválidas."
+                    });
+                }
+
+                req.logIn(user, (err) => {
+                    if (err) {
+                        console.error("Erro ao criar sessão:", err);
+                        return res.status(500).json({
+                            success: false,
+                            message: "Erro ao criar sessão."
+                        });
+                    }
+
+                    return res.status(200).json({
+                        success: true,
+                        message: "Login realizado com sucesso"
+                    });
+                });
+            })(req, res, next);
         } catch (error) {
-          console.error("Erro no login:", error);
-          req.flash("erro", "Erro inesperado ao tentar fazer login.");
-          res.redirect("/login");
+            console.error("Erro no login:", error);
+            return res.status(500).json({
+                success: false,
+                message: "Erro inesperado ao tentar fazer login."
+            });
         }
-      }
+    }
+
 
     async logout(req, res, next) {
         try {
