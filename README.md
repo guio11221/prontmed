@@ -35,7 +35,7 @@ Aqui você pode ver algumas das interfaces do OpenPront em ação.
 
 [//]: # (![Tela de Agendamento]&#40;docs/images/agendamento/img.png&#41;)
 
-[//]: # (*&#40;Lembre-se de substituir `agendamento/img.png` pelo caminho correto da sua imagem de agendamento&#41;*)
+[//]: # (*&#40;`agendamento/img.png` pelo caminho correto da sua imagem de agendamento&#41;*)
 
 ## ⚙️ Como Configurar e Rodar o Projeto
 
