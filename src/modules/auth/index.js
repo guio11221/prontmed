@@ -16,22 +16,17 @@ passport.use(
       try {
         const user = await prisma.user.findUnique({ where: { email: email } });
 
-        // 1. Verifica se o usuário existe
         if (!user) {
           return done(null, false, { message: "Email ou senha incorretos!" });
         }
 
-        // 2. Compara a senha fornecida com a senha armazenada (hash)
-        // Usamos user.senha? para garantir que a senha exista antes de comparar
         const isValidPassword = user.senha 
             ? await bcrypt.compare(senha, user.senha) 
             : false;
         
-        // Se a senha for válida, autentica o usuário
         if (isValidPassword) {
           return done(null, user);
         } else {
-          // Senha incorreta
           return done(null, false, { message: "Email ou senha incorretos!" });
         }
 
@@ -42,8 +37,6 @@ passport.use(
     }
   )
 );
-
-// --- Serialização e Desserialização (Mantidas) ---
 
 passport.serializeUser((user, done) => {
   done(null, user.id);

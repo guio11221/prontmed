@@ -51,9 +51,6 @@ class UI {
             showCancelButton: false,
             timer: 9999999,
             timerProgressBar: true,
-            // didOpen: () => {
-            //     Swal.showLoading();
-            // },
             position: 'top-start',
             toast: true,
             customClass: {
@@ -78,7 +75,6 @@ class AgendaAPI {
         }
 
         if (!response.ok) {
-            // Usa a mensagem retornada pelo backend se houver, caso contrário, usa a mensagem padrão.
             const errorMessage = result.message || result.error || "Ocorreu um erro na requisição.";
             throw new Error(errorMessage);
         }
@@ -94,7 +90,7 @@ class AgendaAPI {
     static async wrappedFetch(url, options) {
         try {
            
-            const response = await fetch(url, options); // Chama o fetch real
+            const response = await fetch(url, options);
             return await this.handleResponse(response);
 
         } catch (error) {
@@ -281,7 +277,6 @@ class EscalaManager {
         if (!this.tasksContainer) return;
 
         const taskKey = this.getTaskKey(date);
-        // Simulação de carregamento do banco (via localStorage)
         const storedTasks = JSON.parse(localStorage.getItem(taskKey) || '[]');
 
         if (storedTasks.length === 0) {
@@ -337,7 +332,7 @@ class EscalaManager {
             const storedTasks = JSON.parse(localStorage.getItem(taskKey) || '[]');
 
             const newTask = {
-                id: Date.now(), // ID simples baseado no timestamp
+                id: Date.now(),
                 descricao: result.value,
                 concluida: false
             };
@@ -354,7 +349,7 @@ class EscalaManager {
      * @description Alterna o status de conclusão de uma tarefa.
      */
     toggleTaskComplete(taskId, event) {
-        event.stopPropagation(); // Evita que cliques em elementos filhos afetem a linha
+        event.stopPropagation();
         const taskKey = this.getTaskKey(this.currentViewDate);
         const storedTasks = JSON.parse(localStorage.getItem(taskKey) || '[]');
 
@@ -362,7 +357,7 @@ class EscalaManager {
         if (taskIndex !== -1) {
             storedTasks[taskIndex].concluida = !storedTasks[taskIndex].concluida;
             localStorage.setItem(taskKey, JSON.stringify(storedTasks));
-            this.loadTasks(this.currentViewDate); // Recarrega para atualizar a UI
+            this.loadTasks(this.currentViewDate);
         }
     }
 
@@ -446,20 +441,17 @@ class EscalaManager {
         const uniqueDays = new Set();
 
         existingRows.forEach(row => {
-            // O dia da semana é o valor do primeiro elemento <select>
             const diaSelect = row.querySelector('select');
             if (diaSelect && diaSelect.value) {
                 uniqueDays.add(diaSelect.value);
             }
         });
 
-        // VERIFICAÇÃO DO LIMITE: Impede a adição se 7 dias já estiverem na tabela
         if (uniqueDays.size >= 7) {
             UI.info('Limite Alcançado', 'Você já adicionou regras (ativas ou em edição) para todos os 7 dias da semana.');
             return;
         }
 
-        // Encontra o próximo dia disponível para pré-selecionar (melhoria de UX)
         let nextAvailableDay = 1;
         while (uniqueDays.has(String(nextAvailableDay)) && nextAvailableDay <= 7) {
             nextAvailableDay++;
@@ -519,20 +511,17 @@ class EscalaManager {
                 } catch (error) {
                     errorsFound = true;
                     row.classList.add('table-danger');
-                    // Limpa a mensagem de erro para o frontend
                     const errorMessageText = error.message.replace(/^Error:\s*/, '');
                     errorMessages.push(`<strong>Dia ${this.diasDaSemana[this.collectData(row).diaSemana]}</strong>: ${errorMessageText}`);
                 }
             }
 
-            // CORREÇÃO 1: Adiciona 'await' para garantir que a recarga termine antes do feedback
             await this.loadEscalas();
 
             if (window.AgendaManager) {
                 window.AgendaManager.updateHorariosLivres();
             }
 
-            // CORREÇÃO 2: Força o fechamento de qualquer SweetAlert residual (o loading)
             if (typeof Swal !== 'undefined') {
                 Swal.close();
             }
@@ -608,9 +597,7 @@ class EscalaManager {
                 result = await AgendaAPI.updateEscala(id, data);
             }
 
-            // Atualiza a tabela (e garante que a linha nova seja substituída pela linha de dados)
             this.loadEscalas();
-            // Atualiza a lista de horários livres, já que a escala mudou
             if (window.AgendaManager) {
                 window.AgendaManager.updateHorariosLivres();
             }
@@ -633,7 +620,6 @@ class EscalaManager {
             await AgendaAPI.deleteEscala(id);
             row.remove();
 
-            // Atualiza a lista de horários livres, já que a escala mudou
             if (window.AgendaManager) {
                 window.AgendaManager.updateHorariosLivres();
             }
@@ -672,10 +658,6 @@ class MiniCalendar {
     }
 
     fetchAppointmentDays(year, month) {
-        // MOCK: Supondo que 6, 15 e 22 de Outubro de 2025 têm agendamentos
-        // if (year === 2025 && month === 9) {
-        //     return new Set([6, 15, 22]);
-        // }
         return new Set();
     }
 
@@ -763,14 +745,13 @@ class AgendaManager {
     constructor() {
         this.currentViewDate = new Date();
         this.currentViewDate.setHours(0, 0, 0, 0);
-        this.medicoId = medicoId; // MOCK: O ID do médico logado (necessário para Escala e Agenda)
+        this.medicoId = medicoId;
 
         this.dataAtualElement = document.getElementById('data-atual');
         this.prevDayButton = document.getElementById('prev-day');
         this.nextDayButton = document.getElementById('next-day');
         this.todayButton = document.getElementById('ir-para-hoje');
 
-        // Referências do Modal de Nova Consulta
         this.novaConsultaModal = new bootstrap.Modal(document.getElementById('novaConsultaModal') || {});
         this.formNovaConsulta = document.getElementById('form-nova-consulta');
 
@@ -875,7 +856,6 @@ class AgendaManager {
 
         const compromissos = data.compromissos || [];
 
-        // 1. Filtra consultas Ativas/Pendente/Confirmadas (exclui Cancelado e Faltou)
         const consultasAtivas = compromissos.filter(c =>
             c.status !== 'Cancelado' && c.status !== 'Faltou'
         );
@@ -888,7 +868,7 @@ class AgendaManager {
         let summaryHTML = '<ul class="list-unstyled mb-0">';
 
         consultasAtivas
-            .sort((a, b) => new Date(a.data) - new Date(b.data)) // Ordena por horário
+            .sort((a, b) => new Date(a.data) - new Date(b.data))
             .forEach(c => {
                 const statusDetails = this.getStatusDetails(c.status);
 
@@ -934,7 +914,6 @@ class AgendaManager {
             compromissosMapeados[timeKey].push(c);
         });
 
-        // Atualiza o total com todos os compromissos do dia (incluindo Cancelados/Faltou)
         totalAgendamentosEl.textContent = compromissosDoDia.length;
 
         let agendaHTML = '<table class="agenda-table">';
@@ -1006,9 +985,6 @@ class AgendaManager {
         }
     }
 
-    // Abre o modal ao clicar no horário livre
-
-    // Abre o modal ao clicar no horário livre
     openNewAppointmentModal(timeSlot) {
         const fullDate = this.currentViewDate;
         const [hour, minute] = timeSlot.split(':');
@@ -1018,11 +994,9 @@ class AgendaManager {
 
         const dateString = consultationDate.toISOString().split('T')[0];
 
-        // Preenchimento dos campos de Data e Hora
         document.getElementById('data-consulta').value = dateString;
         document.getElementById('hora-consulta').value = timeSlot;
 
-        // Limpar e resetar campos de paciente
         document.getElementById('paciente-select').value = '';
         document.getElementById('paciente-cpf').value = '';
         document.getElementById('paciente-endereco').value = '';
@@ -1032,15 +1006,59 @@ class AgendaManager {
     }
 
 
-    // Coleta os dados do formulário e salva o agendamento
+    /**
+     * @description Valida se um determinado horário está disponível para agendamento.
+     * Verifica se o horário não está ocupado e se está dentro da escala do médico.
+     * @param {string} dateString A data selecionada no formato 'YYYY-MM-DD'.
+     * @param {string} timeString A hora selecionada no formato 'HH:MM'.
+     * @returns {Promise<boolean>} True se o horário for válido, False caso contrário.
+     */
+    async validateAppointmentTime(dateString, timeString) {
+        if (!dateString || !timeString) {
+            return true;
+        }
+
+        const selectedDateTime = new Date(`${dateString}T${timeString}:00`);
+        const selectedDate = new Date(selectedDateTime.getFullYear(), selectedDateTime.getMonth(), selectedDateTime.getDate());
+
+        try {
+            const agendaDoDia = await AgendaAPI.getAgenda(selectedDate);
+            const compromissosNoHorario = agendaDoDia.compromissos.filter(c => {
+                const dataCompromisso = new Date(c.data);
+                const horaCompromisso = `${String(dataCompromisso.getUTCHours()).padStart(2, '0')}:${String(dataCompromisso.getUTCMinutes()).padStart(2, '0')}`;
+                return horaCompromisso === timeString;
+            });
+
+            if (compromissosNoHorario.length > 0) {
+                UI.info('Horário Ocupado', 'Já existe um agendamento para este horário. Por favor, escolha outro.');
+                return false;
+            }
+
+            const horariosLivres = await AgendaAPI.getHorariosLivres(this.medicoId, selectedDate);
+            if (!horariosLivres.slotsLivres.includes(timeString)) {
+                UI.info('Horário Inválido', 'O horário selecionado não está disponível na escala de trabalho do médico ou já foi preenchido. Por favor, escolha um horário válido.');
+                return false;
+            }
+
+            return true;
+        } catch (error) {
+            UI.error('Erro de Validação', `Não foi possível validar o horário: ${error.message}`);
+            return false;
+        }
+    }
+
+
     async handleSaveNewAppointment() {
         const form = this.formNovaConsulta;
         const submitButton = form.querySelector('button[type="submit"]');
+        const dataConsultaInput = document.getElementById('data-consulta').value;
+        const horaConsultaInput = document.getElementById('hora-consulta').value;
+
         const dataToSend = {
             pacienteNome: document.getElementById('paciente-select').value,
             pacienteCpf: document.getElementById('paciente-cpf').value,
             pacienteEndereco: document.getElementById('paciente-endereco').value,
-            data: `${document.getElementById('data-consulta').value}T${document.getElementById('hora-consulta').value}:00.000Z`,
+            data: `${dataConsultaInput}T${horaConsultaInput}:00.000Z`,
             tipoConsulta: document.getElementById('tipo-consulta').value,
             medicoId: this.medicoId,
             status: 'Agendado'
@@ -1052,16 +1070,24 @@ class AgendaManager {
 
         const originalHTML = submitButton.innerHTML;
         submitButton.disabled = true;
-        submitButton.innerHTML = '<i class="bi bi-arrow-clockwise spin me-2"></i> Salvando...';
+        submitButton.innerHTML = '<i class="bi bi-arrow-clockwise spin me-2"></i> Verificando...';
+
+        const isValid = await this.validateAppointmentTime(dataConsultaInput, horaConsultaInput);
+        if (!isValid) {
+            submitButton.disabled = false;
+            submitButton.innerHTML = originalHTML;
+            return;
+        }
 
         try {
+            submitButton.innerHTML = '<i class="bi bi-arrow-clockwise spin me-2"></i> Salvando...';
             const result = await AgendaAPI.createAgendamento(dataToSend);
             this.novaConsultaModal.hide();
             form.reset();
             document.getElementById('data-consulta').value = '';
             document.getElementById('hora-consulta').value = '';
             await this.loadDay(this.currentViewDate);
-            return UI.success('Agendado com Sucesso', `Agendamento criado para **${result.agendamento.paciente.nome}** às ${document.getElementById('hora-consulta').value}!`);
+            return UI.success('Agendado com Sucesso', `Agendamento criado para **${result.agendamento.paciente.nome}** às ${horaConsultaInput}!`);
 
         } catch (error) {
             return UI.error('Falha ao salvar', error.message);
@@ -1081,16 +1107,10 @@ class AgendaManager {
         const modalContentArea = document.getElementById('modal-content-area');
         const modalTitle = document.getElementById('pacienteDetailModalLabel');
 
-        // Referências dos botões (IDs definidos no HTML do modal)
         const btnIniciarAtendimento = document.getElementById('btn-iniciar-atendimento');
         const btnCancelarAgendamento = document.getElementById('btn-cancelar-agendamento-footer');
         const btnEditarAgendamento = document.getElementById('btn-editar-agendamento');
 
-        // 1. Estado inicial
-        modalTitle.textContent = `Carregando Agendamento #${id}`;
-        modalContentArea.innerHTML = '<div class="text-center p-5 text-muted"><i class="bi bi-arrow-clockwise spin me-2"></i>Buscando dados na clínica...</div>';
-
-        // Oculta todos os botões no início
         btnIniciarAtendimento.style.display = 'none';
         btnCancelarAgendamento.style.display = 'none';
         btnEditarAgendamento.style.display = 'none';
@@ -1098,16 +1118,11 @@ class AgendaManager {
         modal.show();
 
         try {
-            // 2. Busca os dados do agendamento
             const data = await AgendaAPI.getAgendamentoById(id);
             const agendamento = data.agenda;
 
-            // ----------------------------------------------------------------------------------
-            // --- VERIFICAÇÃO CHAVE PARA AÇÕES (INICIAR/CANCELAR): Não pode estar CANCELADO ou ATENDIDO ---
             const isActionable = agendamento.status === 'Agendado' || agendamento.status === 'Confirmado';
-            // ----------------------------------------------------------------------------------
 
-            // 3. Formatação da Data
             const dataObj = new Date(agendamento.data);
             const dataParte = dataObj.toLocaleDateString('pt-BR', {
                 weekday: 'long',
@@ -1120,7 +1135,6 @@ class AgendaManager {
 
             const statusClass = this.getStatusClass(agendamento.status);
 
-            // 4. Injeta o HTML no modalContentArea
             modalContentArea.innerHTML = `
                 <div class="row g-0">
                     <div class="col-md-5 p-4 border-end bg-light-subtle">
@@ -1181,12 +1195,9 @@ class AgendaManager {
 
             modalTitle.textContent = `Agendamento #${agendamento.id}: ${agendamento.paciente.nome}`;
 
-            // 5. Configuração dos botões do Footer (APENAS SE FOR ACIONÁVEL)
             if (isActionable) {
 
-                // 5.1. Botão "Iniciar Atendimento"
                 btnIniciarAtendimento.style.display = 'block';
-                // Remove o listener antigo e adiciona o novo (evita duplicidade de eventos)
                 btnIniciarAtendimento.replaceWith(btnIniciarAtendimento.cloneNode(true));
                 document.getElementById('btn-iniciar-atendimento').addEventListener('click', () => {
                     modal.hide();
@@ -1194,9 +1205,7 @@ class AgendaManager {
                     window.location.href = novaRota;
                 });
 
-                // 5.2. Botão "Cancelar Agendamento"
                 btnCancelarAgendamento.style.display = 'block';
-                // Remove o listener antigo e adiciona o novo
                 btnCancelarAgendamento.replaceWith(btnCancelarAgendamento.cloneNode(true));
                 document.getElementById('btn-cancelar-agendamento-footer').addEventListener('click', async () => {
                     const confirmation = await UI.confirm(
@@ -1206,11 +1215,9 @@ class AgendaManager {
 
                     if (confirmation.isConfirmed) {
                         try {
-                            // Chama a API para mudar o status para 'Cancelado' (Soft Delete)
                             await AgendaAPI.updateAgendamentoStatus(agendamento.id, 'Cancelado');
                             modal.hide();
                             UI.success('Agendamento Cancelado!', `O agendamento #${agendamento.id} foi cancelado.`);
-                            // Recarrega a agenda para que o item Cancelado mude de cor na tabela
                             await this.loadDay(this.currentViewDate);
 
                         } catch (error) {
@@ -1220,15 +1227,12 @@ class AgendaManager {
                 });
             }
 
-            // O botão de Editar pode aparecer se o status não for 'Atendido', 'Cancelado' ou 'Faltou'
             if (agendamento.status !== 'Atendido' && agendamento.status !== 'Cancelado' && agendamento.status !== 'Faltou') {
                 btnEditarAgendamento.style.display = 'block';
-                // Lógica de evento de edição aqui, se necessário
             }
 
 
         } catch (error) {
-            // 6. Exibe erro
             modalTitle.textContent = 'Erro ao Carregar Detalhes';
             modalContentArea.innerHTML = `
                 <div class="alert alert-danger text-center p-4 m-4">
@@ -1236,7 +1240,6 @@ class AgendaManager {
                     <p class="text-muted small mt-2">${error.message}</p>
                 </div>
             `;
-            // Garante que os botões de ação fiquem ocultos em caso de erro
             btnIniciarAtendimento.style.display = 'none';
             btnCancelarAgendamento.style.display = 'none';
             btnEditarAgendamento.style.display = 'none';
@@ -1249,21 +1252,31 @@ class AgendaManager {
         if (this.nextDayButton) this.nextDayButton.addEventListener('click', () => this.changeDay(1));
         if (this.todayButton) this.todayButton.addEventListener('click', () => this.goToToday());
 
-        // Listener do formulário de nova consulta
         if (this.formNovaConsulta) {
             this.formNovaConsulta.addEventListener('submit', (e) => {
                 e.preventDefault();
                 this.handleSaveNewAppointment();
             });
+
+            const dataConsultaEl = document.getElementById('data-consulta');
+            const horaConsultaEl = document.getElementById('hora-consulta');
+
+            if (dataConsultaEl && horaConsultaEl) {
+                const validateAndDisplay = async () => {
+                    await this.validateAppointmentTime(dataConsultaEl.value, horaConsultaEl.value);
+                };
+
+                dataConsultaEl.addEventListener('change', validateAndDisplay);
+                horaConsultaEl.addEventListener('change', validateAndDisplay);
+            }
         }
 
-        // Listener de pesquisa de paciente (debounce)
         if (this.inputPacienteNome) {
             this.inputPacienteNome.addEventListener('input', () => {
                 clearTimeout(this.searchTimeout);
                 this.searchTimeout = setTimeout(() => {
                     this.handlePacienteSearch(this.inputPacienteNome.value);
-                }, 300); // 300ms de atraso
+                }, 300);
             });
         }
     }
@@ -1283,7 +1296,6 @@ class AgendaManager {
                 data.pacientes.forEach(p => {
                     const option = document.createElement('option');
                     option.value = p.nome;
-                    // Adiciona o CPF para facilitar a identificação
                     option.textContent = `${p.nome} - CPF: ${p.cpf}`;
                     option.dataset.cpf = p.cpf;
                     option.dataset.endereco = p.endereco || '';
@@ -1292,13 +1304,11 @@ class AgendaManager {
             }
 
         } catch (error) {
-            // Erro já tratado na API, apenas loga.
             console.error("Erro ao buscar pacientes:", error);
         }
     }
 }
 
-// Inicialização das classes (apenas se os elementos HTML existirem)
 document.addEventListener('DOMContentLoaded', () => {
     if (typeof medicoId === 'undefined') {
         window.medicoId = 1;
@@ -1308,7 +1318,6 @@ document.addEventListener('DOMContentLoaded', () => {
     window.miniCalendar = new MiniCalendar();
     window.miniCalendar.render();
 
-    // Inicia o EscalaManager
     if (document.getElementById('escalaModal')) {
         window.EscalaManager = new EscalaManager();
     }
