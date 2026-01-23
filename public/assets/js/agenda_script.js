@@ -71,7 +71,7 @@ class AgendaAPI {
         try {
             result = await response.json();
         } catch (e) {
-            result = { message: response.statusText || "Erro de conexão ou servidor interno." };
+            result = {message: response.statusText || "Erro de conexão ou servidor interno."};
         }
 
         if (!response.ok) {
@@ -89,15 +89,16 @@ class AgendaAPI {
      */
     static async wrappedFetch(url, options) {
         try {
-           
+
             const response = await fetch(url, options);
             return await this.handleResponse(response);
 
         } catch (error) {
 
             throw error;
-        }  
+        }
     }
+
     // --- AGENDA CRUD ---
 
     static async getAgenda(date) {
@@ -105,18 +106,18 @@ class AgendaAPI {
         try {
             return this.wrappedFetch(`/agenda?date=${formattedDate}`, {
                 method: 'GET',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {'Content-Type': 'application/json'},
             });
         } catch (error) {
             throw error;
         }
     }
- 
+
     static async getAgendamentoById(id) {
         try {
             return this.wrappedFetch(`/agenda/${id}`, {
                 method: 'GET',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {'Content-Type': 'application/json'},
             });
         } catch (error) {
             throw error;
@@ -125,27 +126,27 @@ class AgendaAPI {
 
     static async createAgendamento(data) {
         try {
-            UI.loading(); 
+            UI.loading();
             return this.wrappedFetch('/agenda', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(data),
             });
         } catch (error) {
             throw error;
         } finally {
-             UI.loading().close()
+            UI.loading().close()
         }
     }
 
     static async updateAgendamentoStatus(id, newStatus) {
         try {
             const method = newStatus === 'Cancelado' ? 'DELETE' : 'PUT';
-             UI.loading();
+            UI.loading();
             return this.wrappedFetch(`/agenda/${id}`, {
                 method: method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: newStatus }),
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({status: newStatus}),
             });
         } catch (error) {
             throw error;
@@ -159,7 +160,7 @@ class AgendaAPI {
 
             return this.wrappedFetch(`/escalas/${medicoId}`, {
                 method: 'GET',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {'Content-Type': 'application/json'},
             });
         } catch (error) {
             throw error;
@@ -170,7 +171,7 @@ class AgendaAPI {
         try {
             return this.wrappedFetch('/escalas', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(data),
             });
         } catch (error) {
@@ -182,7 +183,7 @@ class AgendaAPI {
         try {
             return this.wrappedFetch(`/escalas/${id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(data),
             });
         } catch (error) {
@@ -194,7 +195,7 @@ class AgendaAPI {
         try {
             return this.wrappedFetch(`/escalas/${id}`, {
                 method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {'Content-Type': 'application/json'},
             });
         } catch (error) {
             throw error;
@@ -203,16 +204,16 @@ class AgendaAPI {
 
     static async searchPacientes(query) {
         if (!query || query.length < 2) {
-            return { success: true, pacientes: [] };
+            return {success: true, pacientes: []};
         }
         try {
             return this.wrappedFetch(`/pacientes/search?q=${encodeURIComponent(query)}`, {
                 method: 'GET',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {'Content-Type': 'application/json'},
             });
         } catch (error) {
             console.error("Erro na busca de pacientes:", error);
-            return { success: false, pacientes: [] };
+            return {success: false, pacientes: []};
         }
     }
 
@@ -221,7 +222,7 @@ class AgendaAPI {
         try {
             return this.wrappedFetch(`/disponibilidade/${medicoId}?date=${formattedDate}`, {
                 method: 'GET',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {'Content-Type': 'application/json'},
             });
 
         } catch (error) {
@@ -252,7 +253,7 @@ class EscalaManager {
         };
 
         this.addEventListeners();
-    
+
 
     }
 
@@ -270,9 +271,9 @@ class EscalaManager {
     }
 
     /**
-    * @description Carrega e renderiza as tarefas para o dia atual.
-    * @param {Date} date A data para carregar as tarefas.
-    */
+     * @description Carrega e renderiza as tarefas para o dia atual.
+     * @param {Date} date A data para carregar as tarefas.
+     */
     loadTasks(date) {
         if (!this.tasksContainer) return;
 
@@ -378,6 +379,7 @@ class EscalaManager {
             UI.success('Removida', 'Tarefa removida com sucesso.');
         }
     }
+
     renderEscala(escala) {
         const isNew = !escala.id;
         const row = document.createElement('tr');
@@ -395,16 +397,23 @@ class EscalaManager {
         row.insertCell().appendChild(diaSelect);
 
         const inputInicio = document.createElement('input');
-        inputInicio.type = 'time'; inputInicio.className = 'form-control form-control-sm'; inputInicio.value = escala.horaInicio || '08:00';
+        inputInicio.type = 'time';
+        inputInicio.className = 'form-control form-control-sm';
+        inputInicio.value = escala.horaInicio || '08:00';
         row.insertCell().appendChild(inputInicio);
 
         const inputFim = document.createElement('input');
-        inputFim.type = 'time'; inputFim.className = 'form-control form-control-sm'; inputFim.value = escala.horaFim || '18:00';
+        inputFim.type = 'time';
+        inputFim.className = 'form-control form-control-sm';
+        inputFim.value = escala.horaFim || '18:00';
         row.insertCell().appendChild(inputFim);
 
         const inputDuracao = document.createElement('input');
-        inputDuracao.type = 'number'; inputDuracao.min = '15'; inputDuracao.step = '5';
-        inputDuracao.className = 'form-control form-control-sm'; inputDuracao.value = escala.duracaoConsulta || 30;
+        inputDuracao.type = 'number';
+        inputDuracao.min = '15';
+        inputDuracao.step = '5';
+        inputDuracao.className = 'form-control form-control-sm';
+        inputDuracao.value = escala.duracaoConsulta || 30;
         row.insertCell().appendChild(inputDuracao);
 
         const cellAcoes = row.insertCell();
@@ -471,8 +480,8 @@ class EscalaManager {
 
     // --- CRUD ACTIONS ---
     /**
-         * @description Percorre todas as linhas da tabela e salva/atualiza cada escala.
-         */
+     * @description Percorre todas as linhas da tabela e salva/atualiza cada escala.
+     */
     async handleSaveAll() {
         if (!this.tableBody || this.tableBody.children.length === 0) {
             return UI.info('Nada para salvar', 'A tabela de escalas está vazia.');
@@ -653,7 +662,7 @@ class MiniCalendar {
     }
 
     formatMonthTitle(date) {
-        let title = date.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+        let title = date.toLocaleDateString('pt-BR', {month: 'long', year: 'numeric'});
         return title.charAt(0).toUpperCase() + title.slice(1);
     }
 
@@ -755,22 +764,23 @@ class AgendaManager {
         this.novaConsultaModal = new bootstrap.Modal(document.getElementById('novaConsultaModal') || {});
         this.formNovaConsulta = document.getElementById('form-nova-consulta');
 
-        this.inputPacienteNome = document.getElementById('paciente-select'); 
-        this.datalistPacientes = document.getElementById('pacientes-datalist'); 
+        this.inputPacienteNome = document.getElementById('paciente-select');
+        this.datalistPacientes = document.getElementById('pacientes-datalist');
         this.inputPacienteCpf = document.getElementById('paciente-cpf');
         this.inputPacienteEndereco = document.getElementById('paciente-endereco');
-        this.searchTimeout = null;  
+        this.searchTimeout = null;
 
         this.addEventListeners();
         this.initializeTooltips();
         this.updateHeaderDisplay();
 
-        this.loadDay(this.currentViewDate); 
+        this.loadDay(this.currentViewDate);
     }
+
     // --- UTILS ---
 
     formatDate(date) {
-        return date.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+        return date.toLocaleDateString('pt-BR', {weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'});
     }
 
     updateHeaderDisplay() {
@@ -784,25 +794,46 @@ class AgendaManager {
 
     getStatusDetails(status) {
         switch (status) {
-            case 'Confirmado': return { class: 'bg-success-subtle text-success border border-success-subtle', icon: 'bi-check-circle-fill' };
+            case 'Confirmado':
+                return {
+                    class: 'bg-success-subtle text-success border border-success-subtle',
+                    icon: 'bi-check-circle-fill'
+                };
             case 'Agendado':
-            case 'Pendente': return { class: 'bg-warning-subtle text-warning border border-warning-subtle', icon: 'bi-clock-fill' };
-            case 'Cancelado': return { class: 'bg-danger-subtle text-danger border border-danger-subtle', icon: 'bi-x-octagon-fill' };
-            case 'Atendido': return { class: 'bg-primary-subtle text-primary border border-primary-subtle', icon: 'bi-check-all' };
-            case 'Faltou': return { class: 'bg-secondary-subtle text-secondary border border-secondary-subtle', icon: 'bi-person-x-fill' };
-            default: return { class: 'bg-secondary-subtle text-secondary border border-secondary-subtle', icon: 'bi-info-circle-fill' };
+            case 'Pendente':
+                return {class: 'bg-warning-subtle text-warning border border-warning-subtle', icon: 'bi-clock-fill'};
+            case 'Cancelado':
+                return {class: 'bg-danger-subtle text-danger border border-danger-subtle', icon: 'bi-x-octagon-fill'};
+            case 'Atendido':
+                return {class: 'bg-primary-subtle text-primary border border-primary-subtle', icon: 'bi-check-all'};
+            case 'Faltou':
+                return {
+                    class: 'bg-secondary-subtle text-secondary border border-secondary-subtle',
+                    icon: 'bi-person-x-fill'
+                };
+            default:
+                return {
+                    class: 'bg-secondary-subtle text-secondary border border-secondary-subtle',
+                    icon: 'bi-info-circle-fill'
+                };
         }
     }
 
     getStatusClass(status) {
         switch (status) {
-            case 'Confirmado': return 'bg-success text-white';
+            case 'Confirmado':
+                return 'bg-success text-white';
             case 'Agendado':
-            case 'Pendente': return 'bg-warning text-dark';
-            case 'Cancelado': return 'bg-danger text-white';
-            case 'Atendido': return 'bg-primary text-white';
-            case 'Faltou': return 'bg-secondary text-white';
-            default: return 'bg-info text-white';
+            case 'Pendente':
+                return 'bg-warning text-dark';
+            case 'Cancelado':
+                return 'bg-danger text-white';
+            case 'Atendido':
+                return 'bg-primary text-white';
+            case 'Faltou':
+                return 'bg-secondary text-white';
+            default:
+                return 'bg-info text-white';
         }
     }
 
@@ -837,7 +868,7 @@ class AgendaManager {
         }
 
         this.updateHorariosLivres();
- 
+
         if (window.miniCalendar) {
             window.miniCalendar.selectedDate = this.currentViewDate;
             window.miniCalendar.currentViewDate = new Date(this.currentViewDate.getFullYear(), this.currentViewDate.getMonth(), 1);
@@ -847,9 +878,9 @@ class AgendaManager {
 
 
     /**
-    * @description Renderiza uma lista resumida das consultas do dia na barra lateral.
-    * @param {Object} data O objeto completo retornado pela AgendaAPI.getAgenda().
-    */
+     * @description Renderiza uma lista resumida das consultas do dia na barra lateral.
+     * @param {Object} data O objeto completo retornado pela AgendaAPI.getAgenda().
+     */
     renderDaySummary(data) {
         const container = document.getElementById('resumo-consultas-list');
         if (!container) return;
@@ -956,7 +987,7 @@ class AgendaManager {
         this.initializeTooltips();
     }
 
- 
+
     async updateHorariosLivres() {
         const container = document.getElementById('horarios-livres');
         if (!container) return;

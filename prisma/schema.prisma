@@ -8,17 +8,18 @@ datasource db {
 }
 
 model User {
-  id               Int              @id @default(autoincrement())
-  nome             String
-  email            String           @unique
-  senha            String
-  role             UserRole         @default(MEDICO) // sem aspas
-  crm              String?          @unique
-  especialidade    String?
-  criadoEm         DateTime         @default(now())
-  agendasCriadas   Agenda[]         @relation("AgendamentoCriadoPor")
-  agendasAtendidas Agenda[]         @relation("AgendamentoMedico")
-  escalas          EscalaTrabalho[]
+  id                Int                  @id @default(autoincrement())
+  nome              String
+  email             String               @unique
+  senha             String
+  role              UserRole             @default(MEDICO)
+  crm               String?              @unique
+  especialidade     String?
+  criadoEm          DateTime             @default(now())
+  agendasCriadas    Agenda[]             @relation("AgendamentoCriadoPor")
+  agendasAtendidas  Agenda[]             @relation("AgendamentoMedico")
+  escalas           EscalaTrabalho[]
+  observacoesFeitas ConsultaObservacao[]
 }
 
 model Paciente {
@@ -33,18 +34,18 @@ model Paciente {
 }
 
 model Agenda {
-  id           Int          @id @default(autoincrement())
-  pacienteId   Int
-  medicoId     Int
-  data         DateTime
-  tipoConsulta String
-  status       StatusAgenda @default(Agendado)
-  observacoes  String?
-  criadoPor    Int
-  criadoEm     DateTime     @default(now())
-  criador      User         @relation("AgendamentoCriadoPor", fields: [criadoPor], references: [id])
-  medico       User         @relation("AgendamentoMedico", fields: [medicoId], references: [id])
-  paciente     Paciente     @relation(fields: [pacienteId], references: [id])
+  id                  Int                  @id @default(autoincrement())
+  pacienteId          Int
+  medicoId            Int
+  data                DateTime
+  tipoConsulta        String
+  status              StatusAgenda         @default(Agendado)
+  criadoPor           Int
+  criadoEm            DateTime             @default(now())
+  criador             User                 @relation("AgendamentoCriadoPor", fields: [criadoPor], references: [id])
+  medico              User                 @relation("AgendamentoMedico", fields: [medicoId], references: [id])
+  paciente            Paciente             @relation(fields: [pacienteId], references: [id])
+  observacoesConsulta ConsultaObservacao[] // Nova relação para as observações detalhadas
 }
 
 model EscalaTrabalho {
@@ -65,6 +66,18 @@ model Session {
   sid       String   @unique
   data      String
   expiresAt DateTime
+}
+
+model ConsultaObservacao {
+  id           Int      @id @default(autoincrement())
+  agendaId     Int
+  medicoId     Int
+  observacao   String
+  dataRegistro DateTime @default(now())
+  agenda       Agenda   @relation(fields: [agendaId], references: [id])
+  medico       User     @relation(fields: [medicoId], references: [id])
+
+  @@map("ConsultaObservacao")
 }
 
 enum UserRole {
