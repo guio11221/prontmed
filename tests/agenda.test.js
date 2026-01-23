@@ -3,27 +3,22 @@ import { faker } from '@faker-js/faker/locale/pt_BR';
 
 const prisma = new PrismaClient();
 
-// Constants for testing, mimicking the seeder's fixed IDs
 const TEST_MEDICO_ID = 3;
-const TEST_CRIADO_POR_ID = 4; // Recepcionista
+const TEST_CRIADO_POR_ID = 4; 
 
-// Helper to generate a future date for agenda
 function generateFutureDateTime() {
-    const date = faker.date.future({ years: 1 }); // Within the next year
+    const date = faker.date.future({ years: 1 }); 
     date.setHours(faker.helpers.arrayElement([8, 9, 10, 11, 13, 14, 15, 16, 17]), faker.helpers.arrayElement([0, 30]), 0, 0);
     return date;
 }
 
 describe('Agenda Model Integration Tests', () => {
-    let testPatient; // Patient created for each test
-    let testAgenda; // Agenda created for specific tests
+    let testPatient; 
+    let testAgenda; 
 
-    // Before all tests, ensure Prisma client is ready
     beforeAll(async () => {
-        // No specific setup needed here beyond Prisma client initialization
     });
 
-    // Before each test, create a unique patient to ensure isolation
     beforeEach(async () => {
         testPatient = await prisma.paciente.create({
             data: {
@@ -37,7 +32,6 @@ describe('Agenda Model Integration Tests', () => {
         });
     });
 
-    // After each test, clean up all agendas and the patient created by that test
     afterEach(async () => {
         await prisma.agenda.deleteMany({
             where: { pacienteId: testPatient.id },
@@ -47,12 +41,9 @@ describe('Agenda Model Integration Tests', () => {
         });
     });
 
-    // After all tests, disconnect Prisma client
     afterAll(async () => {
         await prisma.$disconnect();
     });
-
-    // --- Test Cases ---
 
     test('should create a new agenda successfully', async () => {
         const newAgendaData = {
@@ -74,12 +65,11 @@ describe('Agenda Model Integration Tests', () => {
         expect(createdAgenda.pacienteId).toBe(newAgendaData.pacienteId);
         expect(createdAgenda.medicoId).toBe(newAgendaData.medicoId);
         expect(createdAgenda.criadoPor).toBe(newAgendaData.criadoPor);
-        expect(createdAgenda.data.toISOString()).toBe(newAgendaData.data.toISOString()); // Compare ISO strings for Date objects
+        expect(createdAgenda.data.toISOString()).toBe(newAgendaData.data.toISOString()); 
         expect(createdAgenda.tipoConsulta).toBe(newAgendaData.tipoConsulta);
         expect(createdAgenda.status).toBe(newAgendaData.status);
         expect(createdAgenda.observacoes).toBe(newAgendaData.observacoes);
 
-        // Verify it exists in the database
         const foundAgenda = await prisma.agenda.findUnique({
             where: { id: createdAgenda.id },
         });
@@ -87,7 +77,6 @@ describe('Agenda Model Integration Tests', () => {
     });
 
     test('should retrieve an existing agenda', async () => {
-        // First, create an agenda to retrieve
         const newAgendaData = {
             pacienteId: testPatient.id,
             medicoId: TEST_MEDICO_ID,
@@ -110,7 +99,6 @@ describe('Agenda Model Integration Tests', () => {
     });
 
     test('should update an existing agenda', async () => {
-        // First, create an agenda to update
         const newAgendaData = {
             pacienteId: testPatient.id,
             medicoId: TEST_MEDICO_ID,
@@ -138,7 +126,6 @@ describe('Agenda Model Integration Tests', () => {
         expect(updatedAgenda.observacoes).toBe(updatedObservacoes);
         expect(updatedAgenda.status).toBe(updatedStatus);
 
-        // Verify the update in the database
         const foundAgenda = await prisma.agenda.findUnique({
             where: { id: testAgenda.id },
         });
@@ -147,7 +134,6 @@ describe('Agenda Model Integration Tests', () => {
     });
 
     test('should delete an agenda', async () => {
-        // First, create an agenda to delete
         const newAgendaData = {
             pacienteId: testPatient.id,
             medicoId: TEST_MEDICO_ID,
@@ -166,7 +152,6 @@ describe('Agenda Model Integration Tests', () => {
         expect(deletedAgenda).toBeDefined();
         expect(deletedAgenda.id).toBe(testAgenda.id);
 
-        // Verify it no longer exists in the database
         const foundAgenda = await prisma.agenda.findUnique({
             where: { id: testAgenda.id },
         });
@@ -174,7 +159,7 @@ describe('Agenda Model Integration Tests', () => {
     });
 
     test('should not retrieve a non-existent agenda', async () => {
-        const nonExistentId = 99999; // Assuming this ID does not exist
+        const nonExistentId = 99999;
 
         const foundAgenda = await prisma.agenda.findUnique({
             where: { id: nonExistentId },

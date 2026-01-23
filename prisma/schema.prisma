@@ -45,7 +45,7 @@ model Agenda {
   criador             User                 @relation("AgendamentoCriadoPor", fields: [criadoPor], references: [id])
   medico              User                 @relation("AgendamentoMedico", fields: [medicoId], references: [id])
   paciente            Paciente             @relation(fields: [pacienteId], references: [id])
-  observacoesConsulta ConsultaObservacao[] // Nova relação para as observações detalhadas
+  observacoesConsulta ConsultaObservacao[]
 }
 
 model EscalaTrabalho {
