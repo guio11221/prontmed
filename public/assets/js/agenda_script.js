@@ -247,6 +247,9 @@ class EscalaManager {
         this.saveAllButton = document.getElementById('save-all-escalas-btn');
         this.tasksContainer = document.getElementById('tarefas-do-dia-list');
         this.addTarefaButton = document.getElementById('add-tarefa-btn');
+        this.summaryContainer = document.getElementById('escala-dia-summary');
+        this.summaryLabel = document.getElementById('escala-dia-label');
+        this.escalas = [];
         this.diasDaSemana = {
             1: "Segunda-feira", 2: "Terça-feira", 3: "Quarta-feira", 4: "Quinta-feira",
             5: "Sexta-feira", 6: "Sábado", 7: "Domingo",
@@ -565,17 +568,118 @@ class EscalaManager {
         try {
             const data = await AgendaAPI.getEscalas(this.medicoId);
             this.tableBody.innerHTML = '';
+            this.escalas = data.escalas || [];
 
-            if (data.escalas && data.escalas.length > 0) {
-                data.escalas.forEach(escala => {
+            if (this.escalas.length > 0) {
+                this.escalas.forEach(escala => {
                     this.tableBody.appendChild(this.renderEscala(escala));
                 });
             } else {
                 this.tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Nenhuma escala definida. Adicione uma regra.</td></tr>';
             }
+            const refDate = window.AgendaManager?.currentViewDate || new Date();
+            this.renderDaySchedule(refDate);
         } catch (error) {
             this.tableBody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">Erro ao carregar: ${error.message}</td></tr>`;
         }
+    }
+
+    async ensureEscalasLoaded() {
+        if (this.escalas.length > 0) return;
+        try {
+            const data = await AgendaAPI.getEscalas(this.medicoId);
+            this.escalas = data.escalas || [];
+        } catch (error) {
+            this.escalas = [];
+        }
+    }
+
+    async renderDaySchedule(date) {
+        if (!this.summaryContainer) return;
+        await this.ensureEscalasLoaded();
+
+        const jsDay = date.getDay();
+        const diaSemana = jsDay === 0 ? 7 : jsDay;
+        const diaLabel = this.diasDaSemana[diaSemana] || 'Dia';
+
+        if (this.summaryLabel) {
+            this.summaryLabel.textContent = `Escala de ${diaLabel}`;
+        }
+
+        const escalasDoDia = this.escalas
+            .filter(e => e.diaSemana === diaSemana)
+            .sort((a, b) => (a.horaInicio || '').localeCompare(b.horaInicio || ''));
+
+        if (escalasDoDia.length === 0) {
+            this.summaryContainer.innerHTML = `
+                <div class="escala-empty">
+                    <i class="bi bi-exclamation-circle me-1"></i>
+                    Sem escala definida para este dia.
+                </div>
+            `;
+            return;
+        }
+
+        const toMinutes = (time) => {
+            if (!time) return 0;
+            const [h, m] = time.split(':').map(v => parseInt(v, 10));
+            return (h * 60) + (m || 0);
+        };
+
+        const totalMinutes = escalasDoDia.reduce((sum, e) => {
+            const start = toMinutes(e.horaInicio);
+            const end = toMinutes(e.horaFim);
+            return end > start ? sum + (end - start) : sum;
+        }, 0);
+
+        const totalHours = Math.floor(totalMinutes / 60);
+        const totalMins = totalMinutes % 60;
+
+        const now = new Date();
+        const nowMinutes = now.getHours() * 60 + now.getMinutes();
+        let nextSlot = null;
+        const isToday = (date.toDateString() === new Date().toDateString());
+        if (isToday) {
+            nextSlot = escalasDoDia.find(e => toMinutes(e.horaInicio) > nowMinutes);
+        }
+        const isInSchedule = isToday && escalasDoDia.some(e => {
+            const start = toMinutes(e.horaInicio);
+            const end = toMinutes(e.horaFim);
+            return nowMinutes >= start && nowMinutes < end;
+        });
+
+        const itemsHtml = escalasDoDia.map(e => `
+            <div class="escala-item">
+                <div class="escala-time">
+                    <span>${e.horaInicio || '--:--'}</span>
+                    <span class="sep">→</span>
+                    <span>${e.horaFim || '--:--'}</span>
+                </div>
+                <div class="escala-meta">
+                    <i class="bi bi-stopwatch me-1"></i>${e.duracaoConsulta || 30} min
+                </div>
+            </div>
+        `).join('');
+
+        const summaryHtml = `
+            <div class="escala-stats">
+                <div class="escala-stat ${isInSchedule ? 'active' : ''}">
+                    <span class="label">Status agora</span>
+                    <span class="value">${isToday ? (isInSchedule ? 'Em escala' : 'Fora da escala') : '—'}</span>
+                </div>
+                <div class="escala-stat">
+                    <span class="label">Total do dia</span>
+                    <span class="value">${totalHours}h ${totalMins}m</span>
+                </div>
+                <div class="escala-stat">
+                    <span class="label">Próximo início</span>
+                    <span class="value">${isToday ? (nextSlot ? nextSlot.horaInicio : '—') : '—'}</span>
+                </div>
+            </div>
+            <div class="escala-list">${itemsHtml}</div>
+        `;
+
+        this.summaryContainer.innerHTML = summaryHtml;
     }
 
     collectData(row) {
@@ -699,9 +803,11 @@ class MiniCalendar {
                     daySpan.textContent = date;
 
                     const isSelected = (date === this.selectedDate.getDate() && month === this.selectedDate.getMonth() && year === this.selectedDate.getFullYear());
+                    const isToday = (date === this.today.getDate() && month === this.today.getMonth() && year === this.today.getFullYear());
                     const hasAppointment = appointmentDays.has(date);
 
                     if (isSelected) daySpan.classList.add('selected');
+                    if (isToday) daySpan.classList.add('today');
                     if (hasAppointment) daySpan.classList.add('has-appointment');
 
                     daySpan.onclick = this.handleDayClick.bind(this, date, month, year);
@@ -755,6 +861,7 @@ class AgendaManager {
         this.currentViewDate = new Date();
         this.currentViewDate.setHours(0, 0, 0, 0);
         this.medicoId = medicoId;
+        this.currentTimeInterval = null;
 
         this.dataAtualElement = document.getElementById('data-atual');
         this.prevDayButton = document.getElementById('prev-day');
@@ -773,8 +880,12 @@ class AgendaManager {
         this.addEventListeners();
         this.initializeTooltips();
         this.updateHeaderDisplay();
+        this.initModalStepper();
 
         this.loadDay(this.currentViewDate);
+        this.currentTimeInterval = setInterval(() => {
+            this.updateCurrentTimeIndicator();
+        }, 60000);
     }
 
     // --- UTILS ---
@@ -790,6 +901,219 @@ class AgendaManager {
     initializeTooltips() {
         const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
         [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+    }
+
+    maskCPF(value) {
+        const digits = (value || '').replace(/\D/g, '').slice(0, 11);
+        const part1 = digits.slice(0, 3);
+        const part2 = digits.slice(3, 6);
+        const part3 = digits.slice(6, 9);
+        const part4 = digits.slice(9, 11);
+        let result = part1;
+        if (part2) result += `.${part2}`;
+        if (part3) result += `.${part3}`;
+        if (part4) result += `-${part4}`;
+        return result;
+    }
+
+    isValidCPF(value) {
+        const cpf = (value || '').replace(/\D/g, '');
+        if (cpf.length !== 11) return false;
+        if (/^(\d)\1+$/.test(cpf)) return false;
+
+        const calc = (base) => {
+            let sum = 0;
+            for (let i = 0; i < base.length; i++) {
+                sum += parseInt(base[i], 10) * (base.length + 1 - i);
+            }
+            const mod = (sum * 10) % 11;
+            return mod === 10 ? 0 : mod;
+        };
+
+        const d1 = calc(cpf.slice(0, 9));
+        const d2 = calc(cpf.slice(0, 9) + d1);
+        return cpf === (cpf.slice(0, 9) + d1 + d2);
+    }
+
+    setCpfFieldValidity(input, isValid) {
+        if (!input) return;
+        input.classList.toggle('is-invalid', !isValid);
+        let feedback = input.parentElement.querySelector('.invalid-feedback');
+        if (!feedback) {
+            feedback = document.createElement('div');
+            feedback.className = 'invalid-feedback';
+            feedback.textContent = 'CPF inválido. Verifique os dígitos.';
+            input.parentElement.appendChild(feedback);
+        }
+    }
+
+    initModalStepper() {
+        const modal = document.getElementById('novaConsultaModal');
+        if (!modal) return;
+
+        const steps = Array.from(modal.querySelectorAll('.modal-steps .step'));
+        const groups = Array.from(modal.querySelectorAll('.step-group'));
+        const backBtn = modal.querySelector('#step-back-btn');
+        const nextBtn = modal.querySelector('#step-next-btn');
+        const typeSelect = modal.querySelector('#tipo-consulta');
+        const typeBadge = modal.querySelector('#step-type-badge');
+        const form = modal.querySelector('#form-nova-consulta');
+        const submitBtn = form ? form.querySelector('button[type="submit"]') : null;
+        if (steps.length === 0 || groups.length === 0) return;
+        let currentStep = 1;
+        const totalSteps = groups.length;
+
+        const setActive = (stepNum) => {
+            steps.forEach((s, i) => s.classList.toggle('active', i === stepNum - 1));
+        };
+
+        const isStepValid = (stepNum) => {
+            const group = groups.find(g => parseInt(g.dataset.step, 10) === stepNum);
+            if (!group) return true;
+            const required = Array.from(group.querySelectorAll('input[required], select[required]'));
+            const allFilled = required.every(el => !!el.value);
+            if (!allFilled) return false;
+            if (stepNum === 1) {
+                const cpfInput = modal.querySelector('#paciente-cpf');
+                return this.isValidCPF(cpfInput?.value || '');
+            }
+            return true;
+        };
+
+        const showStep = (stepNum) => {
+            currentStep = Math.max(1, Math.min(stepNum, totalSteps));
+            groups.forEach(g => g.classList.toggle('active', parseInt(g.dataset.step, 10) === currentStep));
+            setActive(currentStep);
+            if (currentStep === 4) fillReview();
+            updateNav();
+        };
+
+        const updateNav = () => {
+            if (backBtn) backBtn.disabled = currentStep === 1;
+            if (nextBtn) nextBtn.style.display = currentStep === totalSteps ? 'none' : 'inline-flex';
+            if (submitBtn) submitBtn.style.display = currentStep === totalSteps ? 'inline-flex' : 'none';
+            if (nextBtn) nextBtn.disabled = !isStepValid(currentStep);
+        };
+
+        const updateCompleted = () => {
+            steps.forEach((s, i) => {
+                const group = groups[i];
+                const required = Array.from(group.querySelectorAll('input[required], select[required]'));
+                const filled = required.every(el => !!el.value);
+                s.classList.toggle('completed', filled);
+            });
+            updateNav();
+        };
+
+        groups.forEach(group => {
+            group.addEventListener('focusin', (e) => {
+                const stepNum = parseInt(group.dataset.step, 10) || 1;
+                showStep(stepNum);
+            });
+            group.addEventListener('input', updateCompleted);
+            group.addEventListener('change', updateCompleted);
+        });
+
+        if (backBtn) {
+            backBtn.addEventListener('click', () => {
+                showStep(currentStep - 1);
+            });
+        }
+
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                if (isStepValid(currentStep)) {
+                    showStep(currentStep + 1);
+                }
+            });
+        }
+
+        const fillReview = () => {
+            const byId = (id) => modal.querySelector(id);
+            const setText = (id, value) => {
+                const el = byId(id);
+                if (el) el.textContent = value || '—';
+            };
+            setText('#review-paciente', byId('#paciente-select')?.value);
+            setText('#review-cpf', byId('#paciente-cpf')?.value);
+            setText('#review-endereco', byId('#paciente-endereco')?.value);
+            setText('#review-data', byId('#data-consulta')?.value);
+            setText('#review-hora', byId('#hora-consulta')?.value);
+            setText('#review-tipo', byId('#tipo-consulta')?.value);
+        };
+
+        if (typeSelect && typeBadge) {
+            const updateBadge = () => {
+                const value = typeSelect.value;
+                if (!value) {
+                    typeBadge.textContent = '';
+                    typeBadge.classList.remove('visible');
+                    return;
+                }
+                typeBadge.textContent = value;
+                typeBadge.classList.add('visible');
+            };
+            typeSelect.addEventListener('change', updateBadge);
+            updateBadge();
+        }
+
+        const cpfInput = modal.querySelector('#paciente-cpf');
+        if (cpfInput) {
+            cpfInput.addEventListener('input', () => {
+                cpfInput.value = this.maskCPF(cpfInput.value);
+                this.setCpfFieldValidity(cpfInput, this.isValidCPF(cpfInput.value) || cpfInput.value.length === 0);
+                updateCompleted();
+            });
+            cpfInput.addEventListener('blur', () => {
+                const valid = this.isValidCPF(cpfInput.value);
+                this.setCpfFieldValidity(cpfInput, valid);
+            });
+        }
+
+        modal.addEventListener('show.bs.modal', () => {
+            showStep(1);
+            updateCompleted();
+        });
+
+        steps.forEach((step, index) => {
+            step.addEventListener('click', () => {
+                const targetStep = index + 1;
+                if (targetStep <= currentStep || isStepValid(currentStep)) {
+                    showStep(targetStep);
+                }
+            });
+        });
+    }
+
+    isSameDay(a, b) {
+        return a.getFullYear() === b.getFullYear()
+            && a.getMonth() === b.getMonth()
+            && a.getDate() === b.getDate();
+    }
+
+    isCurrentTimeSlot(timeSlot) {
+        const now = new Date();
+        const [hour, minute] = timeSlot.split(':').map(v => parseInt(v, 10));
+        const slotMinutes = (hour * 60) + minute;
+        const nowMinutes = (now.getHours() * 60) + now.getMinutes();
+        return nowMinutes >= slotMinutes && nowMinutes < (slotMinutes + 30);
+    }
+
+    updateCurrentTimeIndicator() {
+        const mainArea = document.getElementById('agenda-horarios');
+        if (!mainArea) return;
+
+        const isToday = this.isSameDay(this.currentViewDate, new Date());
+        const rows = mainArea.querySelectorAll('.agenda-row');
+        rows.forEach(r => r.classList.remove('current-time'));
+
+        if (!isToday) return;
+
+        const now = new Date();
+        const roundedMinutes = Math.floor(now.getMinutes() / 30) * 30;
+        const timeKey = `${String(now.getHours()).padStart(2, '0')}:${String(roundedMinutes).padStart(2, '0')}`;
+        const currentRow = mainArea.querySelector(`.agenda-row[data-time="${timeKey}"]`);
+        if (currentRow) currentRow.classList.add('current-time');
     }
 
     getStatusDetails(status) {
@@ -837,7 +1161,6 @@ class AgendaManager {
         }
     }
 
-
     // --- NAVEGAÇÃO E CARREGAMENTO DE DATA ---
 
     changeDay(days) {
@@ -868,6 +1191,10 @@ class AgendaManager {
         }
 
         this.updateHorariosLivres();
+
+        if (window.EscalaManager) {
+            window.EscalaManager.renderDaySchedule(this.currentViewDate);
+        }
 
         if (window.miniCalendar) {
             window.miniCalendar.selectedDate = this.currentViewDate;
@@ -931,6 +1258,10 @@ class AgendaManager {
     renderMainAgenda(data) {
         const mainArea = document.getElementById('agenda-horarios');
         const totalAgendamentosEl = document.getElementById('total-agendamentos');
+        const metricTotal = document.getElementById('metric-total');
+        const metricAgendadas = document.getElementById('metric-agendadas');
+        const metricConfirmadas = document.getElementById('metric-confirmadas');
+        const metricCanceladas = document.getElementById('metric-canceladas');
         const compromissosDoDia = data.compromissos || [];
         const compromissosMapeados = {};
         compromissosDoDia.forEach(c => {
@@ -946,6 +1277,10 @@ class AgendaManager {
         });
 
         totalAgendamentosEl.textContent = compromissosDoDia.length;
+        if (metricTotal) metricTotal.textContent = compromissosDoDia.length;
+        if (metricAgendadas) metricAgendadas.textContent = compromissosDoDia.filter(c => c.status === 'Agendado').length;
+        if (metricConfirmadas) metricConfirmadas.textContent = compromissosDoDia.filter(c => c.status === 'Confirmado').length;
+        if (metricCanceladas) metricCanceladas.textContent = compromissosDoDia.filter(c => c.status === 'Cancelado').length;
 
         let agendaHTML = '<table class="agenda-table">';
 
@@ -954,6 +1289,8 @@ class AgendaManager {
                 const timeSlot = `${hora.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`;
                 const slots = compromissosMapeados[timeSlot] || [];
                 const occupiedClass = slots.length > 0 ? 'slot-occupied' : '';
+                const isToday = this.isSameDay(this.currentViewDate, new Date());
+                const isCurrentTime = isToday && this.isCurrentTimeSlot(timeSlot);
 
                 let contentHTML = slots.map(c => {
                     const statusDetails = this.getStatusDetails(c.status);
@@ -970,7 +1307,7 @@ class AgendaManager {
                 }).join('');
 
                 agendaHTML += `
-                    <tr class="agenda-row ${occupiedClass}" data-time="${timeSlot}">
+                    <tr class="agenda-row ${occupiedClass} ${isCurrentTime ? 'current-time' : ''}" data-time="${timeSlot}">
                         <td class="time-label-cell">${timeSlot}</td>
                         <td class="agenda-content-cell">
                             <div class="agenda-content-area">
@@ -985,6 +1322,7 @@ class AgendaManager {
         agendaHTML += '</table>';
         mainArea.innerHTML = agendaHTML;
         this.initializeTooltips();
+        this.updateCurrentTimeIndicator();
     }
 
 
@@ -998,16 +1336,24 @@ class AgendaManager {
             const data = await AgendaAPI.getHorariosLivres(this.medicoId, this.currentViewDate);
 
             if (data.slotsLivres && data.slotsLivres.length > 0) {
-                let buttonsHTML = data.slotsLivres.map(slot =>
-                    `<button class="btn btn-outline-secondary btn-sm horario-btn me-1 mb-1" 
-                                 data-time="${slot}" 
-                                 onclick="window.AgendaManager.openNewAppointmentModal('${slot}')">
+                let buttonsHTML = data.slotsLivres.map(slot => {
+                    const [hour, minute] = slot.split(':');
+                    const slotDate = new Date(this.currentViewDate);
+                    slotDate.setHours(parseInt(hour), parseInt(minute), 0, 0);
+                    const isPast = slotDate < new Date();
+
+                    return `
+                        <button class="btn btn-outline-secondary btn-sm horario-btn me-1 mb-1 ${isPast ? 'disabled' : ''}"
+                                data-time="${slot}"
+                                ${isPast ? 'disabled data-bs-toggle="tooltip" data-bs-title="Horário já passou"' : `onclick="window.AgendaManager.openNewAppointmentModal('${slot}')"`}>
                             ${slot}
-                        </button>`
-                ).join('');
+                        </button>
+                    `;
+                }).join('');
 
                 container.innerHTML = `<div class="d-flex flex-wrap justify-content-center">${buttonsHTML}</div>` +
                     '<p class="text-muted small text-center mt-3 mb-0">Clique para agendar rápido</p>';
+                this.initializeTooltips();
             } else {
                 container.innerHTML = '<div class="alert alert-info text-center small p-2 mt-3">Nenhum horário livre encontrado.</div>';
             }
@@ -1044,13 +1390,21 @@ class AgendaManager {
      * @param {string} timeString A hora selecionada no formato 'HH:MM'.
      * @returns {Promise<boolean>} True se o horário for válido, False caso contrário.
      */
-    async validateAppointmentTime(dateString, timeString) {
+    async validateAppointmentTime(dateString, timeString, silent = false) {
         if (!dateString || !timeString) {
             return true;
         }
 
         const selectedDateTime = new Date(`${dateString}T${timeString}:00`);
         const selectedDate = new Date(selectedDateTime.getFullYear(), selectedDateTime.getMonth(), selectedDateTime.getDate());
+        const now = new Date();
+
+        if (selectedDateTime < now) {
+            if (!silent) {
+                UI.info('Horário inválido', 'Você não pode agendar em um horário que já passou. Por favor, escolha um horário futuro.');
+            }
+            return false;
+        }
 
         try {
             const agendaDoDia = await AgendaAPI.getAgenda(selectedDate);
@@ -1061,19 +1415,25 @@ class AgendaManager {
             });
 
             if (compromissosNoHorario.length > 0) {
-                UI.info('Horário Ocupado', 'Já existe um agendamento para este horário. Por favor, escolha outro.');
+                if (!silent) {
+                    UI.info('Horário Ocupado', 'Já existe um agendamento para este horário. Por favor, escolha outro.');
+                }
                 return false;
             }
 
             const horariosLivres = await AgendaAPI.getHorariosLivres(this.medicoId, selectedDate);
             if (!horariosLivres.slotsLivres.includes(timeString)) {
-                UI.info('Horário Inválido', 'O horário selecionado não está disponível na escala de trabalho do médico ou já foi preenchido. Por favor, escolha um horário válido.');
+                if (!silent) {
+                    UI.info('Horário Inválido', 'O horário selecionado não está disponível na escala de trabalho do médico ou já foi preenchido. Por favor, escolha um horário válido.');
+                }
                 return false;
             }
 
             return true;
         } catch (error) {
-            UI.error('Erro de Validação', `Não foi possível validar o horário: ${error.message}`);
+            if (!silent) {
+                UI.error('Erro de Validação', `Não foi possível validar o horário: ${error.message}`);
+            }
             return false;
         }
     }
@@ -1103,8 +1463,27 @@ class AgendaManager {
         submitButton.disabled = true;
         submitButton.innerHTML = '<i class="bi bi-arrow-clockwise spin me-2"></i> Verificando...';
 
-        const isValid = await this.validateAppointmentTime(dataConsultaInput, horaConsultaInput);
+        const isValid = await this.validateAppointmentTime(dataConsultaInput, horaConsultaInput, false);
         if (!isValid) {
+            submitButton.disabled = false;
+            submitButton.innerHTML = originalHTML;
+            return;
+        }
+
+        const confirmHtml = `
+            <div class="text-start">
+                <p class="mb-2"><strong>Paciente:</strong> ${dataToSend.pacienteNome || '-'}</p>
+                <p class="mb-2"><strong>CPF:</strong> ${dataToSend.pacienteCpf || '-'}</p>
+                <p class="mb-2"><strong>Endereço:</strong> ${dataToSend.pacienteEndereco || '-'}</p>
+                <p class="mb-2"><strong>Data:</strong> ${dataConsultaInput || '-'}</p>
+                <p class="mb-0"><strong>Hora:</strong> ${horaConsultaInput || '-'}</p>
+                <hr class="my-2">
+                <p class="mb-0"><strong>Tipo:</strong> ${dataToSend.tipoConsulta || '-'}</p>
+            </div>
+        `;
+
+        const confirmation = await UI.confirm('Confirmar Agendamento?', confirmHtml);
+        if (!confirmation.isConfirmed) {
             submitButton.disabled = false;
             submitButton.innerHTML = originalHTML;
             return;
@@ -1167,6 +1546,25 @@ class AgendaManager {
             const statusClass = this.getStatusClass(agendamento.status);
 
             modalContentArea.innerHTML = `
+                <div class="detail-status-bar">
+                    <div class="status-left">
+                        <span class="badge fs-6 p-2 ${statusClass}">
+                            <i class="bi bi-info-circle me-1"></i>${agendamento.status}
+                        </span>
+                        <span class="status-meta">
+                            <i class="bi bi-clock me-1"></i>${dataConsultaFormatada}
+                        </span>
+                    </div>
+                    <div class="status-right">
+                        <span class="status-id">ID #${agendamento.id}</span>
+                        <span class="status-doctor"><i class="bi bi-person-badge me-1"></i>${agendamento.medico.nome}</span>
+                        <div class="status-actions">
+                            <button class="btn btn-sm btn-success" id="detail-action-start"><i class="bi bi-play-circle me-1"></i>Iniciar</button>
+                            <button class="btn btn-sm btn-danger" id="detail-action-cancel"><i class="bi bi-x-octagon me-1"></i>Cancelar</button>
+                            <button class="btn btn-sm btn-info" id="detail-action-edit"><i class="bi bi-pencil-square me-1"></i>Editar</button>
+                        </div>
+                    </div>
+                </div>
                 <div class="row g-0">
                     <div class="col-md-5 p-4 border-end bg-light-subtle">
                         <h5 class="text-primary mb-3">
@@ -1226,6 +1624,14 @@ class AgendaManager {
 
             modalTitle.textContent = `Agendamento #${agendamento.id}: ${agendamento.paciente.nome}`;
 
+            const actionStart = document.getElementById('detail-action-start');
+            const actionCancel = document.getElementById('detail-action-cancel');
+            const actionEdit = document.getElementById('detail-action-edit');
+
+            if (actionStart) actionStart.style.display = 'none';
+            if (actionCancel) actionCancel.style.display = 'none';
+            if (actionEdit) actionEdit.style.display = 'none';
+
             if (isActionable) {
 
                 btnIniciarAtendimento.style.display = 'block';
@@ -1256,10 +1662,23 @@ class AgendaManager {
                         }
                     }
                 });
+
+                if (actionStart) {
+                    actionStart.style.display = 'inline-flex';
+                    actionStart.onclick = () => document.getElementById('btn-iniciar-atendimento').click();
+                }
+                if (actionCancel) {
+                    actionCancel.style.display = 'inline-flex';
+                    actionCancel.onclick = () => document.getElementById('btn-cancelar-agendamento-footer').click();
+                }
             }
 
             if (agendamento.status !== 'Atendido' && agendamento.status !== 'Cancelado' && agendamento.status !== 'Faltou') {
                 btnEditarAgendamento.style.display = 'block';
+                if (actionEdit) {
+                    actionEdit.style.display = 'inline-flex';
+                    actionEdit.onclick = () => document.getElementById('btn-editar-agendamento').click();
+                }
             }
 
 
@@ -1293,12 +1712,48 @@ class AgendaManager {
             const horaConsultaEl = document.getElementById('hora-consulta');
 
             if (dataConsultaEl && horaConsultaEl) {
-                const validateAndDisplay = async () => {
-                    await this.validateAppointmentTime(dataConsultaEl.value, horaConsultaEl.value);
+                // Validação será feita apenas no avanço/salvar para evitar alertas durante digitação.
+                const validateSilently = async () => {
+                    if (!dataConsultaEl.value) return;
+                    if (!horaConsultaEl.value || horaConsultaEl.value.length < 5) {
+                        horaConsultaEl.classList.remove('is-invalid');
+                        const fb = horaConsultaEl.parentElement.querySelector('.hora-feedback');
+                        if (fb) fb.remove();
+                        return;
+                    }
+                    const ok = await this.validateAppointmentTime(dataConsultaEl.value, horaConsultaEl.value, true);
+                    horaConsultaEl.classList.toggle('is-invalid', !ok);
+
+                    let fb = horaConsultaEl.parentElement.querySelector('.hora-feedback');
+                    if (!ok) {
+                        if (!fb) {
+                            fb = document.createElement('div');
+                            fb.className = 'hora-feedback';
+                            fb.textContent = 'Esse horário não está disponível. Tente outro horário.';
+                            const link = document.createElement('button');
+                            link.type = 'button';
+                            link.className = 'hora-feedback-link';
+                            link.textContent = 'Ver horários livres';
+                            link.addEventListener('click', () => {
+                                const card = document.getElementById('horarios-livres-card');
+                                if (card) {
+                                    card.scrollIntoView({behavior: 'smooth', block: 'start'});
+                                    card.classList.add('highlight-card');
+                                    setTimeout(() => card.classList.remove('highlight-card'), 1200);
+                                }
+                            });
+                            fb.setAttribute('role', 'status');
+                            fb.setAttribute('aria-live', 'polite');
+                            fb.appendChild(link);
+                            horaConsultaEl.parentElement.appendChild(fb);
+                        }
+                    } else if (fb) {
+                        fb.remove();
+                    }
                 };
 
-                dataConsultaEl.addEventListener('change', validateAndDisplay);
-                horaConsultaEl.addEventListener('change', validateAndDisplay);
+                dataConsultaEl.addEventListener('change', validateSilently);
+                horaConsultaEl.addEventListener('blur', validateSilently);
             }
         }
 

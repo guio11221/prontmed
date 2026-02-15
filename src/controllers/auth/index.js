@@ -9,7 +9,7 @@ export default class AuthController {
 
     async authPage(req, res, next) {
         try {
-            res.render("login/page", {title: "Login", erro: req.flash("erro"), sucesso: req.flash("sucesso") });
+            res.render("login/page", {title: "Login", erro: req.flash("erro"), sucesso: req.flash("sucesso"), layout: false });
         } catch (error) {
             console.error("Erro ao carregar página de login:", error);
             res.status(500).send("Erro interno ao carregar login.");
