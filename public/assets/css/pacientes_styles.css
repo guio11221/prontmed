@@ -1,0 +1,447 @@
+/* refined_pacientes_styles.css - Premium Patients View */
+
+.pacientes-container {
+    padding: 2.5rem;
+    background-color: var(--prontmed-bg-body);
+    min-height: calc(100vh - 64px);
+    animation: fadeInSlide 0.5s ease-out;
+}
+
+@keyframes fadeInSlide {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Header Refinement */
+.page-header-premium {
+    background: white;
+    padding: 2rem;
+    border-radius: 1.25rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    margin-bottom: 2.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid var(--prontmed-border-light);
+}
+
+.header-title h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--prontmed-text-strong);
+    letter-spacing: -0.5px;
+}
+
+.header-title p {
+    color: var(--prontmed-text-secondary);
+    font-size: 0.95rem;
+}
+
+/* Search Box - Premium Consolidated */
+.search-box-premium {
+    display: flex;
+    align-items: center;
+    max-width: 400px;
+    width: 100%;
+    background: #f8fafc;
+    border: 1px solid var(--prontmed-border-medium);
+    border-radius: 12px;
+    padding: 0 1.25rem;
+    height: 48px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.search-box-premium:focus-within {
+    background: white;
+    border-color: var(--prontmed-blue-primary);
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.1);
+    transform: translateY(-1px);
+}
+
+.search-box-premium i {
+    color: var(--prontmed-text-secondary);
+    font-size: 1.1rem;
+    margin-right: 0.75rem;
+    transition: color 0.3s;
+}
+
+.search-box-premium:focus-within i {
+    color: var(--prontmed-blue-primary);
+}
+
+.search-box-premium input {
+    flex: 1;
+    border: none !important;
+    background: transparent !important;
+    outline: none !important;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--prontmed-text-strong);
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+
+.search-box-premium input::placeholder {
+    color: var(--prontmed-text-secondary);
+    opacity: 0.7;
+}
+
+/* Filter Chips Area */
+.filter-tabs {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.filter-chip {
+    padding: 0.5rem 1.25rem;
+    border-radius: 2rem;
+    background: white;
+    border: 1px solid var(--prontmed-border-medium);
+    color: var(--prontmed-text-secondary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.filter-chip:hover {
+    background: var(--prontmed-border-light);
+    color: var(--prontmed-blue-primary);
+}
+
+.filter-chip.active {
+    background: var(--prontmed-blue-primary);
+    color: white;
+    border-color: var(--prontmed-blue-primary);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+/* Table Refinement */
+.pacientes-card {
+    background: white;
+    border-radius: 1.25rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--prontmed-border-light);
+}
+
+.table-premium thead th {
+    background: rgba(248, 250, 252, 0.8);
+    padding: 1.25rem 1.5rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--prontmed-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid var(--prontmed-border-light);
+}
+
+.table-premium tbody td {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--prontmed-border-light);
+}
+
+.table-premium tr:last-child td {
+    border-bottom: none;
+}
+
+.patient-avatar {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: var(--prontmed-blue-primary);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+    transition: all 0.3s;
+}
+
+tr:hover .patient-avatar {
+    transform: scale(1.05) rotate(-2deg);
+    background: linear-gradient(135deg, var(--prontmed-blue-primary) 0%, var(--prontmed-blue-dark) 100%);
+    color: white;
+}
+
+.patient-name {
+    color: var(--prontmed-text-strong);
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 2px;
+}
+
+.patient-info-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--prontmed-text-secondary);
+}
+
+.badge-cpf {
+    background: #f1f5f9;
+    color: #475569;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+}
+
+/* Clinical Indicators */
+.medical-priority {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 6px;
+}
+
+.priority-high {
+    background-color: #ef4444;
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+}
+
+.priority-medium {
+    background-color: #f59e0b;
+}
+
+.priority-low {
+    background-color: #10b981;
+}
+
+.clinical-status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-agendado {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.status-atendido {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status-falta {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.medical-alert-tag {
+    background: #fff1f2;
+    color: #e11d48;
+    border: 1px solid #fecdd3;
+    font-size: 0.65rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Action Buttons */
+.btn-action-group {
+    opacity: 0.4;
+    transition: opacity 0.2s;
+}
+
+tr:hover .btn-action-group {
+    opacity: 1;
+}
+
+.btn-action {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.btn-view {
+    background-color: #eff6ff;
+    color: #2563eb;
+}
+
+.btn-view:hover {
+    background-color: #2563eb;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-edit {
+    background-color: #fefce8;
+    color: #ca8a04;
+}
+
+.btn-edit:hover {
+    background-color: #ca8a04;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-delete {
+    background-color: #fef2f2;
+    color: #dc2626;
+}
+
+.btn-delete:hover {
+    background-color: #dc2626;
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Modal Refinement */
+.patient-detail-header {
+    background: linear-gradient(135deg, var(--prontmed-blue-dark) 0%, #1e293b 100%);
+    padding: 3rem 2rem;
+    text-align: center;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.patient-detail-header::before {
+    content: '';
+    position: absolute;
+    top: -20%;
+    right: -10%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+}
+
+.info-card {
+    border: 1px solid var(--prontmed-border-light);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    height: 100%;
+    transition: all 0.3s;
+}
+
+.info-card:hover {
+    border-color: var(--prontmed-blue-primary);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.info-label {
+    text-transform: uppercase;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--prontmed-text-secondary);
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.info-value {
+    color: var(--prontmed-text-strong);
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+/* Clinical Desktop Shortcut Bar */
+.clinical-shortcuts {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.shortcut-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8fafc;
+    border: 1px solid var(--prontmed-border-light);
+    color: var(--prontmed-text-secondary);
+    transition: all 0.2s;
+    font-size: 0.9rem;
+}
+
+.shortcut-btn:hover {
+    background: white;
+    border-color: var(--prontmed-blue-primary);
+    color: var(--prontmed-blue-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.shortcut-btn.btn-whatsapp:hover {
+    color: #25d366;
+    border-color: #25d366;
+}
+
+.shortcut-btn.btn-telemed:hover {
+    color: #8b5cf6;
+    border-color: #8b5cf6;
+}
+
+/* Timeline Preview in Modal */
+.clinical-timeline {
+    position: relative;
+    padding-left: 2rem;
+}
+
+.clinical-timeline::before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--prontmed-border-light);
+}
+
+.timeline-event {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.timeline-event::after {
+    content: '';
+    position: absolute;
+    left: -1.75rem;
+    top: 0.25rem;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: white;
+    border: 2px solid var(--prontmed-blue-primary);
+    z-index: 2;
+}
+
+
+/* Page Indicator */
+.pacientes-container::after {
+    content: 'OPENPRONT SYSTEM';
+    position: fixed;
+    bottom: 2rem;
+    right: 2.5rem;
+    font-size: 0.6rem;
+    font-weight: 800;
+    color: var(--prontmed-text-secondary);
+    opacity: 0.2;
+    letter-spacing: 2px;
+}

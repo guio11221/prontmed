@@ -71,7 +71,7 @@ class AgendaAPI {
         try {
             result = await response.json();
         } catch (e) {
-            result = {message: response.statusText || "Erro de conexão ou servidor interno."};
+            result = { message: response.statusText || "Erro de conexão ou servidor interno." };
         }
 
         if (!response.ok) {
@@ -106,7 +106,7 @@ class AgendaAPI {
         try {
             return this.wrappedFetch(`/agenda?date=${formattedDate}`, {
                 method: 'GET',
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' },
             });
         } catch (error) {
             throw error;
@@ -117,7 +117,7 @@ class AgendaAPI {
         try {
             return this.wrappedFetch(`/agenda/${id}`, {
                 method: 'GET',
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' },
             });
         } catch (error) {
             throw error;
@@ -129,7 +129,7 @@ class AgendaAPI {
             UI.loading();
             return this.wrappedFetch('/agenda', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
             });
         } catch (error) {
@@ -145,8 +145,8 @@ class AgendaAPI {
             UI.loading();
             return this.wrappedFetch(`/agenda/${id}`, {
                 method: method,
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({status: newStatus}),
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newStatus }),
             });
         } catch (error) {
             throw error;
@@ -160,7 +160,7 @@ class AgendaAPI {
 
             return this.wrappedFetch(`/escalas/${medicoId}`, {
                 method: 'GET',
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' },
             });
         } catch (error) {
             throw error;
@@ -171,7 +171,7 @@ class AgendaAPI {
         try {
             return this.wrappedFetch('/escalas', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
             });
         } catch (error) {
@@ -183,7 +183,7 @@ class AgendaAPI {
         try {
             return this.wrappedFetch(`/escalas/${id}`, {
                 method: 'PUT',
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
             });
         } catch (error) {
@@ -195,7 +195,7 @@ class AgendaAPI {
         try {
             return this.wrappedFetch(`/escalas/${id}`, {
                 method: 'DELETE',
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' },
             });
         } catch (error) {
             throw error;
@@ -204,16 +204,16 @@ class AgendaAPI {
 
     static async searchPacientes(query) {
         if (!query || query.length < 2) {
-            return {success: true, pacientes: []};
+            return { success: true, pacientes: [] };
         }
         try {
             return this.wrappedFetch(`/pacientes/search?q=${encodeURIComponent(query)}`, {
                 method: 'GET',
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' },
             });
         } catch (error) {
             console.error("Erro na busca de pacientes:", error);
-            return {success: false, pacientes: []};
+            return { success: false, pacientes: [] };
         }
     }
 
@@ -222,7 +222,7 @@ class AgendaAPI {
         try {
             return this.wrappedFetch(`/disponibilidade/${medicoId}?date=${formattedDate}`, {
                 method: 'GET',
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' },
             });
 
         } catch (error) {
@@ -230,6 +230,19 @@ class AgendaAPI {
             return {
                 slotsLivres: ["08:30", "09:45", "11:00", "14:00", "15:30"]
             };
+        }
+    }
+
+    static async savePreferences(prefs) {
+        try {
+            return this.wrappedFetch('/medicos/preferences', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ preferences: JSON.stringify(prefs) }),
+            });
+        } catch (error) {
+            console.error("Erro ao salvar preferências:", error);
+            throw error;
         }
     }
 }
@@ -766,7 +779,7 @@ class MiniCalendar {
     }
 
     formatMonthTitle(date) {
-        let title = date.toLocaleDateString('pt-BR', {month: 'long', year: 'numeric'});
+        let title = date.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
         return title.charAt(0).toUpperCase() + title.slice(1);
     }
 
@@ -874,8 +887,21 @@ class AgendaManager {
         this.inputPacienteNome = document.getElementById('paciente-select');
         this.datalistPacientes = document.getElementById('pacientes-datalist');
         this.inputPacienteCpf = document.getElementById('paciente-cpf');
-        this.inputPacienteEndereco = document.getElementById('paciente-endereco');
+
+        // Novos campos de endereço
+        this.inputPacienteCep = document.getElementById('paciente-cep');
+        this.inputPacienteLogradouro = document.getElementById('paciente-logradouro');
+        this.inputPacienteNumero = document.getElementById('paciente-numero');
+        this.inputPacienteComplemento = document.getElementById('paciente-complemento');
+        this.inputPacienteBairro = document.getElementById('paciente-bairro');
+        this.inputPacienteCidade = document.getElementById('paciente-cidade');
+        this.inputPacienteEstado = document.getElementById('paciente-estado');
+
+        this.selectedPacienteId = null;
+        this.selectedPacienteOriginalName = null;
+        this.editingAppointmentId = null;
         this.searchTimeout = null;
+        this.cpfCheckTimeout = null;
 
         this.addEventListeners();
         this.initializeTooltips();
@@ -891,7 +917,7 @@ class AgendaManager {
     // --- UTILS ---
 
     formatDate(date) {
-        return date.toLocaleDateString('pt-BR', {weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'});
+        return date.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
     }
 
     updateHeaderDisplay() {
@@ -917,33 +943,40 @@ class AgendaManager {
     }
 
     isValidCPF(value) {
-        const cpf = (value || '').replace(/\D/g, '');
+        if (!value) return false;
+        const cpf = value.replace(/\D/g, '');
         if (cpf.length !== 11) return false;
         if (/^(\d)\1+$/.test(cpf)) return false;
 
-        const calc = (base) => {
-            let sum = 0;
-            for (let i = 0; i < base.length; i++) {
-                sum += parseInt(base[i], 10) * (base.length + 1 - i);
-            }
-            const mod = (sum * 10) % 11;
-            return mod === 10 ? 0 : mod;
-        };
+        let sum = 0;
+        let remainder;
 
-        const d1 = calc(cpf.slice(0, 9));
-        const d2 = calc(cpf.slice(0, 9) + d1);
-        return cpf === (cpf.slice(0, 9) + d1 + d2);
+        for (let i = 1; i <= 9; i++) {
+            sum += parseInt(cpf.substring(i - 1, i)) * (11 - i);
+        }
+        remainder = (sum * 10) % 11;
+        if (remainder === 10 || remainder === 11) remainder = 0;
+        if (remainder !== parseInt(cpf.substring(9, 10))) return false;
+
+        sum = 0;
+        for (let i = 1; i <= 10; i++) {
+            sum += parseInt(cpf.substring(i - 1, i)) * (12 - i);
+        }
+        remainder = (sum * 10) % 11;
+        if (remainder === 10 || remainder === 11) remainder = 0;
+        if (remainder !== parseInt(cpf.substring(10, 11))) return false;
+
+        return true;
     }
 
     setCpfFieldValidity(input, isValid) {
         if (!input) return;
-        input.classList.toggle('is-invalid', !isValid);
-        let feedback = input.parentElement.querySelector('.invalid-feedback');
-        if (!feedback) {
-            feedback = document.createElement('div');
-            feedback.className = 'invalid-feedback';
-            feedback.textContent = 'CPF inválido. Verifique os dígitos.';
-            input.parentElement.appendChild(feedback);
+        if (isValid || input.value.length === 0) {
+            input.classList.remove('is-invalid');
+            input.classList.add('is-valid');
+        } else {
+            input.classList.remove('is-valid');
+            input.classList.add('is-invalid');
         }
     }
 
@@ -989,10 +1022,18 @@ class AgendaManager {
         };
 
         const updateNav = () => {
-            if (backBtn) backBtn.disabled = currentStep === 1;
-            if (nextBtn) nextBtn.style.display = currentStep === totalSteps ? 'none' : 'inline-flex';
-            if (submitBtn) submitBtn.style.display = currentStep === totalSteps ? 'inline-flex' : 'none';
-            if (nextBtn) nextBtn.disabled = !isStepValid(currentStep);
+            if (backBtn) {
+                backBtn.style.visibility = currentStep === 1 ? 'hidden' : 'visible';
+                backBtn.disabled = currentStep === 1;
+            }
+            if (nextBtn) {
+                nextBtn.style.display = currentStep === totalSteps ? 'none' : 'inline-flex';
+                nextBtn.disabled = !isStepValid(currentStep);
+            }
+            if (submitBtn) {
+                submitBtn.style.display = currentStep === totalSteps ? 'inline-flex' : 'none';
+                submitBtn.disabled = !isStepValid(totalSteps - 1) || !isStepValid(totalSteps);
+            }
         };
 
         const updateCompleted = () => {
@@ -1006,10 +1047,6 @@ class AgendaManager {
         };
 
         groups.forEach(group => {
-            group.addEventListener('focusin', (e) => {
-                const stepNum = parseInt(group.dataset.step, 10) || 1;
-                showStep(stepNum);
-            });
             group.addEventListener('input', updateCompleted);
             group.addEventListener('change', updateCompleted);
         });
@@ -1022,8 +1059,12 @@ class AgendaManager {
 
         if (nextBtn) {
             nextBtn.addEventListener('click', () => {
+                console.log('Next button clicked, currentStep:', currentStep);
                 if (isStepValid(currentStep)) {
+                    console.log('Step is valid, going to:', currentStep + 1);
                     showStep(currentStep + 1);
+                } else {
+                    console.warn('Step is NOT valid');
                 }
             });
         }
@@ -1036,7 +1077,16 @@ class AgendaManager {
             };
             setText('#review-paciente', byId('#paciente-select')?.value);
             setText('#review-cpf', byId('#paciente-cpf')?.value);
-            setText('#review-endereco', byId('#paciente-endereco')?.value);
+
+            // Endereço formatado no review
+            const addr = [
+                byId('#paciente-logradouro')?.value,
+                byId('#paciente-numero')?.value,
+                byId('#paciente-bairro')?.value,
+                byId('#paciente-cidade')?.value
+            ].filter(Boolean).join(', ');
+            setText('#review-endereco', addr || '—');
+
             setText('#review-data', byId('#data-consulta')?.value);
             setText('#review-hora', byId('#hora-consulta')?.value);
             setText('#review-tipo', byId('#tipo-consulta')?.value);
@@ -1061,7 +1111,23 @@ class AgendaManager {
         if (cpfInput) {
             cpfInput.addEventListener('input', () => {
                 cpfInput.value = this.maskCPF(cpfInput.value);
-                this.setCpfFieldValidity(cpfInput, this.isValidCPF(cpfInput.value) || cpfInput.value.length === 0);
+                const isValidFormat = this.isValidCPF(cpfInput.value);
+                this.setCpfFieldValidity(cpfInput, isValidFormat || cpfInput.value.length === 0);
+
+                // Real-time duplicate check
+                clearTimeout(this.cpfCheckTimeout);
+                if (isValidFormat && !this.selectedPacienteId) {
+                    this.cpfCheckTimeout = setTimeout(async () => {
+                        const cleanCpf = cpfInput.value.replace(/\D/g, '');
+                        const data = await AgendaAPI.searchPacientes(cleanCpf);
+                        const existing = (data.pacientes || []).find(p => p.cpf.replace(/\D/g, '') === cleanCpf);
+                        if (existing) {
+                            cpfInput.classList.add('is-invalid');
+                            UI.info('Atenção', `Este CPF já pertence a **${existing.nome}**. <br> Selecione-o na busca de nomes.`);
+                        }
+                    }, 800);
+                }
+
                 updateCompleted();
             });
             cpfInput.addEventListener('blur', () => {
@@ -1071,8 +1137,11 @@ class AgendaManager {
         }
 
         modal.addEventListener('show.bs.modal', () => {
+            currentStep = 1;
+            this.selectedPacienteId = null;
             showStep(1);
             updateCompleted();
+            form.querySelectorAll('.is-valid, .is-invalid').forEach(el => el.classList.remove('is-valid', 'is-invalid'));
         });
 
         steps.forEach((step, index) => {
@@ -1096,7 +1165,7 @@ class AgendaManager {
         const [hour, minute] = timeSlot.split(':').map(v => parseInt(v, 10));
         const slotMinutes = (hour * 60) + minute;
         const nowMinutes = (now.getHours() * 60) + now.getMinutes();
-        return nowMinutes >= slotMinutes && nowMinutes < (slotMinutes + 30);
+        return nowMinutes >= slotMinutes && nowMinutes < (slotMinutes + 15);
     }
 
     updateCurrentTimeIndicator() {
@@ -1110,7 +1179,7 @@ class AgendaManager {
         if (!isToday) return;
 
         const now = new Date();
-        const roundedMinutes = Math.floor(now.getMinutes() / 30) * 30;
+        const roundedMinutes = Math.floor(now.getMinutes() / 15) * 15;
         const timeKey = `${String(now.getHours()).padStart(2, '0')}:${String(roundedMinutes).padStart(2, '0')}`;
         const currentRow = mainArea.querySelector(`.agenda-row[data-time="${timeKey}"]`);
         if (currentRow) currentRow.classList.add('current-time');
@@ -1125,11 +1194,11 @@ class AgendaManager {
                 };
             case 'Agendado':
             case 'Pendente':
-                return {class: 'bg-warning-subtle text-warning border border-warning-subtle', icon: 'bi-clock-fill'};
+                return { class: 'bg-warning-subtle text-warning border border-warning-subtle', icon: 'bi-clock-fill' };
             case 'Cancelado':
-                return {class: 'bg-danger-subtle text-danger border border-danger-subtle', icon: 'bi-x-octagon-fill'};
+                return { class: 'bg-danger-subtle text-danger border border-danger-subtle', icon: 'bi-x-octagon-fill' };
             case 'Atendido':
-                return {class: 'bg-primary-subtle text-primary border border-primary-subtle', icon: 'bi-check-all'};
+                return { class: 'bg-primary-subtle text-primary border border-primary-subtle', icon: 'bi-check-all' };
             case 'Faltou':
                 return {
                     class: 'bg-secondary-subtle text-secondary border border-secondary-subtle',
@@ -1143,21 +1212,21 @@ class AgendaManager {
         }
     }
 
-    getStatusClass(status) {
+    getStatusDetails(status) {
         switch (status) {
             case 'Confirmado':
-                return 'bg-success text-white';
+                return { class: 'status-confirmado', icon: 'bi-check-circle-fill' };
             case 'Agendado':
             case 'Pendente':
-                return 'bg-warning text-dark';
+                return { class: 'status-agendado', icon: 'bi-clock-history' };
             case 'Cancelado':
-                return 'bg-danger text-white';
+                return { class: 'status-cancelado', icon: 'bi-x-circle-fill' };
             case 'Atendido':
-                return 'bg-primary text-white';
+                return { class: 'status-atendido', icon: 'bi-person-check-fill' };
             case 'Faltou':
-                return 'bg-secondary text-white';
+                return { class: 'status-faltou', icon: 'bi-person-x-fill' };
             default:
-                return 'bg-info text-white';
+                return { class: 'status-default', icon: 'bi-info-circle-fill' };
         }
     }
 
@@ -1233,17 +1302,29 @@ class AgendaManager {
                 const dataObj = new Date(c.data);
                 const horaParte = `${String(dataObj.getUTCHours()).padStart(2, '0')}:${String(dataObj.getUTCMinutes()).padStart(2, '0')}`;
 
+                const patientPhoto = c.paciente.foto
+                    ? `<img src="${c.paciente.foto}" class="avatar-agenda-list">`
+                    : `<div class="avatar-agenda-list">${c.paciente.nome.charAt(0).toUpperCase()}</div>`;
+
                 summaryHTML += `
-                    <li class="d-flex align-items-center mb-2 cursor-pointer" 
+                    <li class="d-flex align-items-center mb-3 cursor-pointer p-2 rounded-3 hover-bg-light transition-all" 
                         onclick="window.AgendaManager.openAppointmentDetails(${c.id})">
                         
-                        <span class="text-secondary fw-bold small me-2 flex-shrink-0">${horaParte}</span>
-                        
-                        <div class="flex-grow-1 small text-truncate">
-                            <span class="fw-medium">${c.paciente.nome}</span>
+                        <div class="position-relative">
+                            ${patientPhoto}
+                            <div class="position-absolute bottom-0 end-0 border border-white border-2 rounded-circle" 
+                                 style="width: 12px; height: 12px; background: var(--${statusDetails.class === 'status-confirmado' ? 'prontmed-green-success' : (statusDetails.class === 'status-agendado' ? 'prontmed-blue-primary' : 'prontmed-text-secondary')});">
+                            </div>
                         </div>
-
-                        <i class="bi ${statusDetails.icon} ms-1 small ${statusDetails.class.split(' ')[1]}"></i>
+                        <div class="ms-3 flex-grow-1">
+                            <div class="fw-bold text-dark small mb-0">${c.paciente.nome}</div>
+                            <div class="d-flex align-items-center gap-2 text-muted" style="font-size: 0.7rem;">
+                                <span><i class="bi bi-clock me-1"></i>${horaParte}</span>
+                                <span class="opacity-50">•</span>
+                                <span>${c.tipoConsulta}</span>
+                            </div>
+                        </div>
+                        <i class="bi bi-chevron-right text-muted opacity-25 ms-2"></i>
                     </li>
                 `;
             });
@@ -1284,24 +1365,34 @@ class AgendaManager {
 
         let agendaHTML = '<table class="agenda-table">';
 
-        for (let hora = 8; hora <= 18; hora++) {
-            for (let min = 0; min < 60; min += 30) {
+        for (let hora = 8; hora <= 19; hora++) {
+            for (let min = 0; min < 60; min += 15) {
                 const timeSlot = `${hora.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`;
                 const slots = compromissosMapeados[timeSlot] || [];
-                const occupiedClass = slots.length > 0 ? 'slot-occupied' : '';
+                // Um slot só é considerado ocupado se houver compromissos NÃO cancelados
+                const hasActiveSlots = slots.some(c => c.status !== 'Cancelado');
+                const occupiedClass = hasActiveSlots ? 'slot-occupied' : '';
                 const isToday = this.isSameDay(this.currentViewDate, new Date());
                 const isCurrentTime = isToday && this.isCurrentTimeSlot(timeSlot);
 
                 let contentHTML = slots.map(c => {
-                    const statusDetails = this.getStatusDetails(c.status);
+                    const sd = this.getStatusDetails(c.status);
+                    const patientPhoto = c.paciente.foto
+                        ? `<img src="${c.paciente.foto}" class="avatar-agenda-tiny">`
+                        : `<div class="avatar-agenda-tiny">${c.paciente.nome.charAt(0).toUpperCase()}</div>`;
+
                     return `
-                        <div class="badge ${statusDetails.class} agenda-compromisso" 
-                             data-bs-toggle="tooltip" data-bs-placement="top"
-                             data-bs-title="${c.paciente.nome} | ${c.tipoConsulta} | Dr. ${c.medico.nome.split(' ')[0]}"
-                             data-appointment-id="${c.id}" 
+                        <div class="agenda-compromisso ${sd.class}" 
+                             data-bs-toggle="tooltip" data-bs-title="${c.paciente.nome} | ${c.tipoConsulta}"
                              onclick="window.AgendaManager.openAppointmentDetails(${c.id})">
-                            <i class="bi ${statusDetails.icon} me-1"></i>
-                            <span class="fw-medium">${c.paciente.nome}</span>
+                            <div class="d-flex align-items-center gap-2 w-100">
+                                ${patientPhoto}
+                                <div class="flex-grow-1 text-truncate">
+                                    <div class="fw-bold" style="font-size: 0.8rem;">${c.paciente.nome}</div>
+                                    <div class="opacity-75" style="font-size: 0.65rem;">${c.tipoConsulta}</div>
+                                </div>
+                                <i class="bi ${sd.icon} ms-auto" style="font-size: 0.75rem;"></i>
+                            </div>
                         </div>
                     `;
                 }).join('');
@@ -1309,7 +1400,7 @@ class AgendaManager {
                 agendaHTML += `
                     <tr class="agenda-row ${occupiedClass} ${isCurrentTime ? 'current-time' : ''}" data-time="${timeSlot}">
                         <td class="time-label-cell">${timeSlot}</td>
-                        <td class="agenda-content-cell">
+                        <td class="agenda-content-cell" onclick="window.AgendaManager.handleSlotClick('${timeSlot}', event)">
                             <div class="agenda-content-area">
                                 ${contentHTML}
                             </div>
@@ -1323,61 +1414,141 @@ class AgendaManager {
         mainArea.innerHTML = agendaHTML;
         this.initializeTooltips();
         this.updateCurrentTimeIndicator();
+
+        // Trigger staggered entry animations
+        setTimeout(() => {
+            const cards = mainArea.querySelectorAll('.agenda-compromisso');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0) scale(1)';
+                }, index * 40);
+            });
+        }, 10);
     }
 
+    handleSlotClick(timeSlot, event) {
+        if (event.target.closest('.agenda-compromisso')) {
+            return;
+        }
+        const isToday = this.isSameDay(this.currentViewDate, new Date());
+        const [hour, minute] = timeSlot.split(':');
+        const slotDate = new Date(this.currentViewDate);
+        slotDate.setHours(parseInt(hour), parseInt(minute), 0, 0);
+
+        if (isToday && slotDate < new Date()) {
+            UI.info('Horário Passado', 'Não é possível agendar em horários que já passaram.');
+            return;
+        }
+        this.openNewAppointmentModal(timeSlot);
+    }
 
     async updateHorariosLivres() {
-        const container = document.getElementById('horarios-livres');
-        if (!container) return;
-
-        container.innerHTML = '<p class="text-muted small text-center mt-3" id="loading-horarios">Buscando horários disponíveis...</p>';
+        const containerHoje = document.getElementById('horarios-hoje');
+        const containerAmanha = document.getElementById('horarios-amanha');
+        if (!containerHoje || !containerAmanha) return;
 
         try {
-            const data = await AgendaAPI.getHorariosLivres(this.medicoId, this.currentViewDate);
+            // Horários de Hoje (currentViewDate)
+            const agendaHoje = await AgendaAPI.getAgenda(this.currentViewDate);
+            this.renderSlotsInContainer(containerHoje, this.currentViewDate, agendaHoje.compromissos);
 
-            if (data.slotsLivres && data.slotsLivres.length > 0) {
-                let buttonsHTML = data.slotsLivres.map(slot => {
-                    const [hour, minute] = slot.split(':');
-                    const slotDate = new Date(this.currentViewDate);
-                    slotDate.setHours(parseInt(hour), parseInt(minute), 0, 0);
-                    const isPast = slotDate < new Date();
+            // Horários de Amanhã
+            const amanha = new Date(this.currentViewDate);
+            amanha.setDate(amanha.getDate() + 1);
+            const agendaAmanha = await AgendaAPI.getAgenda(amanha);
+            this.renderSlotsInContainer(containerAmanha, amanha, agendaAmanha.compromissos);
 
-                    return `
-                        <button class="btn btn-outline-secondary btn-sm horario-btn me-1 mb-1 ${isPast ? 'disabled' : ''}"
-                                data-time="${slot}"
-                                ${isPast ? 'disabled data-bs-toggle="tooltip" data-bs-title="Horário já passou"' : `onclick="window.AgendaManager.openNewAppointmentModal('${slot}')"`}>
-                            ${slot}
-                        </button>
-                    `;
-                }).join('');
-
-                container.innerHTML = `<div class="d-flex flex-wrap justify-content-center">${buttonsHTML}</div>` +
-                    '<p class="text-muted small text-center mt-3 mb-0">Clique para agendar rápido</p>';
-                this.initializeTooltips();
-            } else {
-                container.innerHTML = '<div class="alert alert-info text-center small p-2 mt-3">Nenhum horário livre encontrado.</div>';
-            }
         } catch (error) {
-            container.innerHTML = `<div class="alert alert-danger text-center small p-2 mt-3">Erro: ${error.message}</div>`;
+            console.error("Erro ao carregar próximos horários:", error);
         }
+    }
+
+    renderSlotsInContainer(container, date, compromissos, limit = 9) {
+        const compromissosMapeados = new Set();
+        (compromissos || []).forEach(c => {
+            // Se a consulta foi cancelada, o horário volta a ficar livre no mapeamento
+            if (c.status === 'Cancelado') return;
+
+            const d = new Date(c.data);
+            const timeKey = `${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}`;
+            compromissosMapeados.add(timeKey);
+        });
+
+        const now = new Date();
+        const slotsLivres = [];
+
+        for (let h = 8; h <= 18; h++) {
+            for (let m = 0; m < 60; m += 15) {
+                const timeSlot = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+
+                // Verificar se o slot já passou (se for hoje)
+                const slotDate = new Date(date);
+                slotDate.setHours(h, m, 0, 0);
+
+                if (date.toDateString() === now.toDateString() && slotDate < now) continue;
+                if (!compromissosMapeados.has(timeSlot)) {
+                    slotsLivres.push(timeSlot);
+                }
+                if (slotsLivres.length >= limit) break;
+            }
+            if (slotsLivres.length >= limit) break;
+        }
+
+        if (slotsLivres.length === 0) {
+            container.innerHTML = '<p class="text-muted small mb-0 p-2">Sem horários livres.</p>';
+            return;
+        }
+
+        container.innerHTML = slotsLivres.map(slot => `
+            <button class="horario-btn" onclick="window.AgendaManager.handleSidebarSlotClick('${date.toISOString().split('T')[0]}', '${slot}')">
+                ${slot}
+            </button>
+        `).join('');
+    }
+
+    handleSidebarSlotClick(dateStr, timeSlot) {
+        // Mudar a data da agenda se necessário
+        const targetDate = new Date(dateStr + 'T00:00:00');
+        if (targetDate.toDateString() !== this.currentViewDate.toDateString()) {
+            this.currentViewDate = targetDate;
+            this.loadDay(this.currentViewDate);
+        }
+
+        // Pequeno delay para garantir que o modal abra com a data certa carregada (opcional, mas seguro)
+        setTimeout(() => {
+            this.openNewAppointmentModal(timeSlot);
+        }, 50);
     }
 
     openNewAppointmentModal(timeSlot) {
         const fullDate = this.currentViewDate;
         const [hour, minute] = timeSlot.split(':');
-
         const consultationDate = new Date(fullDate);
         consultationDate.setHours(parseInt(hour), parseInt(minute), 0, 0);
-
         const dateString = consultationDate.toISOString().split('T')[0];
-
         document.getElementById('data-consulta').value = dateString;
         document.getElementById('hora-consulta').value = timeSlot;
-
         document.getElementById('paciente-select').value = '';
+        document.getElementById('paciente-select').readOnly = false;
         document.getElementById('paciente-cpf').value = '';
-        document.getElementById('paciente-endereco').value = '';
+
+        // Reset campos endereço
+        if (this.inputPacienteCep) this.inputPacienteCep.value = '';
+        if (this.inputPacienteLogradouro) this.inputPacienteLogradouro.value = '';
+        if (this.inputPacienteNumero) this.inputPacienteNumero.value = '';
+        if (this.inputPacienteComplemento) this.inputPacienteComplemento.value = '';
+        if (this.inputPacienteBairro) this.inputPacienteBairro.value = '';
+        if (this.inputPacienteCidade) this.inputPacienteCidade.value = '';
+        if (this.inputPacienteEstado) this.inputPacienteEstado.value = '';
+
         document.getElementById('tipo-consulta').value = 'Rotina';
+        this.selectedPacienteId = null;
+        this.selectedPacienteOriginalName = null;
+        this.editingAppointmentId = null;
+
+        const clearBtn = document.getElementById('clear-paciente');
+        if (clearBtn) clearBtn.style.display = 'none';
 
         this.novaConsultaModal.show();
     }
@@ -1387,10 +1558,13 @@ class AgendaManager {
      * @description Valida se um determinado horário está disponível para agendamento.
      * Verifica se o horário não está ocupado e se está dentro da escala do médico.
      * @param {string} dateString A data selecionada no formato 'YYYY-MM-DD'.
+     * @param {string} dateString A data selecionada no formato 'YYYY-MM-DD'.
      * @param {string} timeString A hora selecionada no formato 'HH:MM'.
+     * @param {string} pacienteCpf O CPF do paciente para verificar duplicidade no dia.
+     * @param {number|null} excludeId O ID do agendamento atual (para ignorar em edições).
      * @returns {Promise<boolean>} True se o horário for válido, False caso contrário.
      */
-    async validateAppointmentTime(dateString, timeString, silent = false) {
+    async validateAppointmentTime(dateString, timeString, silent = false, pacienteCpf = null, excludeId = null) {
         if (!dateString || !timeString) {
             return true;
         }
@@ -1401,32 +1575,62 @@ class AgendaManager {
 
         if (selectedDateTime < now) {
             if (!silent) {
-                UI.info('Horário inválido', 'Você não pode agendar em um horário que já passou. Por favor, escolha um horário futuro.');
+                UI.info('Horário inválido', 'Você não pode agendar em um horário que já passaram. Por favor, escolha um horário futuro.');
             }
             return false;
         }
 
         try {
             const agendaDoDia = await AgendaAPI.getAgenda(selectedDate);
-            const compromissosNoHorario = agendaDoDia.compromissos.filter(c => {
+            const compromissos = (agendaDoDia.compromissos || []).filter(c => c.id !== excludeId && c.status !== 'Cancelado');
+
+            // 1. Verificar se o HORÁRIO está ocupado
+            const ocupado = compromissos.some(c => {
                 const dataCompromisso = new Date(c.data);
                 const horaCompromisso = `${String(dataCompromisso.getUTCHours()).padStart(2, '0')}:${String(dataCompromisso.getUTCMinutes()).padStart(2, '0')}`;
                 return horaCompromisso === timeString;
             });
 
-            if (compromissosNoHorario.length > 0) {
+            if (ocupado) {
                 if (!silent) {
                     UI.info('Horário Ocupado', 'Já existe um agendamento para este horário. Por favor, escolha outro.');
                 }
                 return false;
             }
 
-            const horariosLivres = await AgendaAPI.getHorariosLivres(this.medicoId, selectedDate);
-            if (!horariosLivres.slotsLivres.includes(timeString)) {
-                if (!silent) {
-                    UI.info('Horário Inválido', 'O horário selecionado não está disponível na escala de trabalho do médico ou já foi preenchido. Por favor, escolha um horário válido.');
+            // 2. Verificar se o PACIENTE já tem consulta no dia (Nova Regra)
+            if (pacienteCpf) {
+                const cleanCpf = pacienteCpf.replace(/\D/g, '');
+
+                // --- NOVA VALIDAÇÃO: CPF GLOBAL ---
+                // Se NÃO temos um pacienteId selecionado (ou seja, o usuário digitou um nome novo),
+                // precisamos garantir que esse CPF não pertença a outro paciente já cadastrado.
+                const searchData = await AgendaAPI.searchPacientes(cleanCpf);
+                const existingPatient = (searchData.pacientes || []).find(p => p.cpf.replace(/\D/g, '') === cleanCpf);
+
+                // Se o CPF existe mas o usuário NÃO selecionou esse paciente na lista (selectedPacienteId está vazio ou diferente)
+                if (existingPatient) {
+                    // Se for um NOVO agendamento e o usuário não selecionou o paciente da lista
+                    if (!this.selectedPacienteId || this.selectedPacienteId !== existingPatient.id) {
+                        if (!silent) {
+                            UI.info('CPF já cadastrado', `Este CPF já pertence ao paciente **${existingPatient.nome}**. <br><br> Por favor, selecione-o na busca de nomes em vez de criar um novo.`);
+                        }
+                        return false;
+                    }
                 }
-                return false;
+
+                // --- MANTER VALIDAÇÃO DE DUPLICIDADE NO DIA ---
+                const jaAgendadoNoDia = compromissos.find(c => {
+                    const cpfC = (c.paciente?.cpf || '').replace(/\D/g, '');
+                    return cpfC === cleanCpf;
+                });
+
+                if (jaAgendadoNoDia) {
+                    if (!silent) {
+                        UI.info('Paciente duplicado', `Este paciente já possui um agendamento (${jaAgendadoNoDia.status}) às **${new Date(jaAgendadoNoDia.data).getUTCHours()}:${String(new Date(jaAgendadoNoDia.data).getUTCMinutes()).padStart(2, '0')}** neste mesmo dia.`);
+                    }
+                    return false;
+                }
             }
 
             return true;
@@ -1446,9 +1650,16 @@ class AgendaManager {
         const horaConsultaInput = document.getElementById('hora-consulta').value;
 
         const dataToSend = {
+            pacienteId: this.selectedPacienteId,
             pacienteNome: document.getElementById('paciente-select').value,
             pacienteCpf: document.getElementById('paciente-cpf').value,
-            pacienteEndereco: document.getElementById('paciente-endereco').value,
+            cep: document.getElementById('paciente-cep').value,
+            logradouro: document.getElementById('paciente-logradouro').value,
+            numero: document.getElementById('paciente-numero').value,
+            complemento: document.getElementById('paciente-complemento').value,
+            bairro: document.getElementById('paciente-bairro').value,
+            cidade: document.getElementById('paciente-cidade').value,
+            estado: document.getElementById('paciente-estado').value,
             data: `${dataConsultaInput}T${horaConsultaInput}:00.000Z`,
             tipoConsulta: document.getElementById('tipo-consulta').value,
             medicoId: this.medicoId,
@@ -1463,31 +1674,21 @@ class AgendaManager {
         submitButton.disabled = true;
         submitButton.innerHTML = '<i class="bi bi-arrow-clockwise spin me-2"></i> Verificando...';
 
-        const isValid = await this.validateAppointmentTime(dataConsultaInput, horaConsultaInput, false);
+        const isValid = await this.validateAppointmentTime(
+            dataConsultaInput,
+            horaConsultaInput,
+            false,
+            dataToSend.pacienteCpf,
+            this.editingAppointmentId // Pass handle for edit cases
+        );
         if (!isValid) {
             submitButton.disabled = false;
             submitButton.innerHTML = originalHTML;
             return;
         }
 
-        const confirmHtml = `
-            <div class="text-start">
-                <p class="mb-2"><strong>Paciente:</strong> ${dataToSend.pacienteNome || '-'}</p>
-                <p class="mb-2"><strong>CPF:</strong> ${dataToSend.pacienteCpf || '-'}</p>
-                <p class="mb-2"><strong>Endereço:</strong> ${dataToSend.pacienteEndereco || '-'}</p>
-                <p class="mb-2"><strong>Data:</strong> ${dataConsultaInput || '-'}</p>
-                <p class="mb-0"><strong>Hora:</strong> ${horaConsultaInput || '-'}</p>
-                <hr class="my-2">
-                <p class="mb-0"><strong>Tipo:</strong> ${dataToSend.tipoConsulta || '-'}</p>
-            </div>
-        `;
-
-        const confirmation = await UI.confirm('Confirmar Agendamento?', confirmHtml);
-        if (!confirmation.isConfirmed) {
-            submitButton.disabled = false;
-            submitButton.innerHTML = originalHTML;
-            return;
-        }
+        // Since we have a Review step in the modal (Step 4), we can skip the extra SweetAlert confirmation
+        // to make the flow faster and more professional.
 
         try {
             submitButton.innerHTML = '<i class="bi bi-arrow-clockwise spin me-2"></i> Salvando...';
@@ -1496,6 +1697,7 @@ class AgendaManager {
             form.reset();
             document.getElementById('data-consulta').value = '';
             document.getElementById('hora-consulta').value = '';
+            await this.loadDay(this.currentViewDate);
             await this.loadDay(this.currentViewDate);
             return UI.success('Agendado com Sucesso', `Agendamento criado para **${result.agendamento.paciente.nome}** às ${horaConsultaInput}!`);
 
@@ -1511,7 +1713,6 @@ class AgendaManager {
      * @description Abre o modal de detalhes do agendamento, ajustando botões de ação com base no status.
      */
     async openAppointmentDetails(id) {
-
         const modalElement = document.getElementById('pacienteDetailModal');
         const modal = new bootstrap.Modal(modalElement);
         const modalContentArea = document.getElementById('modal-content-area');
@@ -1532,97 +1733,99 @@ class AgendaManager {
             const agendamento = data.agenda;
 
             const isActionable = agendamento.status === 'Agendado' || agendamento.status === 'Confirmado';
-
             const dataObj = new Date(agendamento.data);
-            const dataParte = dataObj.toLocaleDateString('pt-BR', {
-                weekday: 'long',
-                day: '2-digit',
-                month: 'long',
-                year: 'numeric'
-            });
-            const horaParte = `${String(dataObj.getUTCHours()).padStart(2, '0')}:${String(dataObj.getUTCMinutes()).padStart(2, '0')}`;
-            const dataConsultaFormatada = `${dataParte} às ${horaParte}`;
+            const dataFormatada = dataObj.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+            const hora = `${String(dataObj.getUTCHours()).padStart(2, '0')}:${String(dataObj.getUTCMinutes()).padStart(2, '0')}`;
+            const statusDetails = this.getStatusDetails(agendamento.status);
 
-            const statusClass = this.getStatusClass(agendamento.status);
+            const patientPhoto = agendamento.paciente.foto
+                ? `<img src="${agendamento.paciente.foto}" class="avatar-agenda-detail">`
+                : `<div class="avatar-agenda-detail">${agendamento.paciente.nome.charAt(0).toUpperCase()}</div>`;
 
             modalContentArea.innerHTML = `
-                <div class="detail-status-bar">
-                    <div class="status-left">
-                        <span class="badge fs-6 p-2 ${statusClass}">
-                            <i class="bi bi-info-circle me-1"></i>${agendamento.status}
-                        </span>
-                        <span class="status-meta">
-                            <i class="bi bi-clock me-1"></i>${dataConsultaFormatada}
-                        </span>
-                    </div>
-                    <div class="status-right">
-                        <span class="status-id">ID #${agendamento.id}</span>
-                        <span class="status-doctor"><i class="bi bi-person-badge me-1"></i>${agendamento.medico.nome}</span>
-                        <div class="status-actions">
-                            <button class="btn btn-sm btn-success" id="detail-action-start"><i class="bi bi-play-circle me-1"></i>Iniciar</button>
-                            <button class="btn btn-sm btn-danger" id="detail-action-cancel"><i class="bi bi-x-octagon me-1"></i>Cancelar</button>
-                            <button class="btn btn-sm btn-info" id="detail-action-edit"><i class="bi bi-pencil-square me-1"></i>Editar</button>
+                <div class="appointment-detail-premium">
+                    <div class="detail-header p-4 text-white d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #003b67 0%, #002544 100%);">
+                        <div class="d-flex align-items-center gap-3">
+                            ${patientPhoto}
+                            <div>
+                                <span class="badge ${statusDetails.class} mb-2 fs-6">
+                                    <i class="bi ${statusDetails.icon} me-1"></i> ${agendamento.status}
+                                </span>
+                                <h3 class="mb-0 fw-bold">${agendamento.paciente.nome}</h3>
+                                <p class="mb-0 opacity-75 small">ID Agendamento: #${agendamento.id} | CPF: ${agendamento.paciente.cpf}</p>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <div class="detail-time-block bg-white bg-opacity-10 p-2 rounded">
+                                <i class="bi bi-calendar3 me-2"></i>${dataFormatada}
+                                <div class="fs-4 fw-bold"><i class="bi bi-clock me-2"></i>${hora}</div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="row g-0">
-                    <div class="col-md-5 p-4 border-end bg-light-subtle">
-                        <h5 class="text-primary mb-3">
-                            <i class="bi bi-calendar-check me-2"></i> Detalhes da Consulta
-                        </h5>
-                        
-                        <div class="mb-3">
-                            <small class="text-muted d-block">STATUS ATUAL</small>
-                            <span class="badge fs-6 p-2 ${statusClass}">${agendamento.status}</span>
-                        </div>
 
-                        <p class="mb-2"><strong><i class="bi bi-clock me-1"></i> Horário:</strong> ${dataConsultaFormatada}</p>
-                        <p class="mb-2"><strong><i class="bi bi-person-badge me-1"></i> Médico:</strong> ${agendamento.medico.nome}</p>
-                        <p class="mb-2"><strong><i class="bi bi-tag me-1"></i> Tipo:</strong> ${agendamento.tipoConsulta}</p>
-                        <p class="mb-2"><strong><i class="bi bi-hash me-1"></i> ID Agendamento:</strong> ${agendamento.id}</p>
-                        
-                    </div>
-
-                    <div class="col-md-7 p-4">
-                        <h5 class="text-primary mb-3">
-                            <i class="bi bi-person-vcard me-2"></i> Dados do Paciente
-                        </h5>
-                        
-                        <div class="row">
-                            <div class="col-12 mb-2">
-                                <small class="text-muted d-block">Nome Completo</small>
-                                <span class="fs-5 fw-bold">${agendamento.paciente.nome}</span>
+                    <div class="p-4 bg-light">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <div class="card h-100 border-0 shadow-sm rounded-4">
+                                    <div class="card-body p-4">
+                                        <h5 class="card-title text-primary mb-4 d-flex align-items-center">
+                                            <i class="bi bi-person-vcard me-2"></i> Dados do Paciente
+                                        </h5>
+                                        <div class="detail-grid">
+                                            <div class="detail-item mb-3">
+                                                <label class="text-muted small d-block mb-1">CPF</label>
+                                                <span class="fw-medium">${agendamento.paciente.cpf}</span>
+                                            </div>
+                                            <div class="detail-item mb-3">
+                                                <label class="text-muted small d-block mb-1">CONTATO / EMAIL</label>
+                                                <span class="fw-medium">${agendamento.paciente.email || 'N/A'}</span>
+                                            </div>
+                                            <div class="detail-item mb-0">
+                                                <label class="text-muted small d-block mb-1">ENDEREÇO</label>
+                                                <span class="fw-medium text-break">${agendamento.paciente.endereco || 'Não informado'}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-md-6 mb-2">
-                                <small class="text-muted d-block">CPF</small>
-                                <span>${agendamento.paciente.cpf}</span>
+                            <div class="col-md-6">
+                                <div class="card h-100 border-0 shadow-sm rounded-4">
+                                    <div class="card-body p-4">
+                                        <h5 class="card-title text-primary mb-4 d-flex align-items-center">
+                                            <i class="bi bi-clipboard-pulse me-2"></i> Informações da Consulta
+                                        </h5>
+                                        <div class="detail-grid">
+                                            <div class="detail-item mb-3">
+                                                <label class="text-muted small d-block mb-1">MÉDICO RESPONSÁVEL</label>
+                                                <span class="fw-medium"><i class="bi bi-person-badge me-1"></i>Dr. ${agendamento.medico.nome}</span>
+                                            </div>
+                                            <div class="detail-item mb-3">
+                                                <label class="text-muted small d-block mb-1">TIPO DE ATENDIMENTO</label>
+                                                <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-3 py-2">
+                                                    ${agendamento.tipoConsulta}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-md-6 mb-2">
-                                <small class="text-muted d-block">Telefone</small>
-                                <span>${agendamento.paciente.telefone || 'N/A'}</span>
+                            
+                            ${agendamento.observacoes ? `
+                            <div class="col-12">
+                                <div class="card border-0 shadow-sm rounded-4 bg-info-subtle">
+                                    <div class="card-body p-3">
+                                        <h6 class="fw-bold mb-2"><i class="bi bi-info-circle me-2"></i>Observações Internas</h6>
+                                        <p class="mb-0 small">${agendamento.observacoes}</p>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-12 mb-2">
-                                <small class="text-muted d-block">Email</small>
-                                <span>${agendamento.paciente.email || 'N/A'}</span>
-                            </div>
-                            <div class="col-12 mb-2">
-                                <small class="text-muted d-block">Endereço</small>
-                                <span>${agendamento.paciente.endereco || 'N/A'}</span>
-                            </div>
+                            ` : ''}
                         </div>
-
-                        ${agendamento.observacoes ? `
-                        <hr class="mt-4 mb-3">
-                        <h5 class="text-primary"><i class="bi bi-journal-text me-2"></i> Observações</h5>
-                        <div class="alert alert-info bg-info-subtle border-start border-4 border-info py-2 px-3">
-                            ${agendamento.observacoes}
-                        </div>
-                        ` : ''}
                     </div>
                 </div>
             `;
 
-            modalTitle.textContent = `Agendamento #${agendamento.id}: ${agendamento.paciente.nome}`;
+            modalTitle.textContent = `Agendamento #${agendamento.id}: ${agendamento.paciente.nome} `;
 
             const actionStart = document.getElementById('detail-action-start');
             const actionCancel = document.getElementById('detail-action-cancel');
@@ -1658,7 +1861,7 @@ class AgendaManager {
                             await this.loadDay(this.currentViewDate);
 
                         } catch (error) {
-                            UI.error('Falha no Cancelamento', `Não foi possível cancelar: ${error.message}`);
+                            UI.error('Falha no Cancelamento', `Não foi possível cancelar: ${error.message} `);
                         }
                     }
                 });
@@ -1675,6 +1878,32 @@ class AgendaManager {
 
             if (agendamento.status !== 'Atendido' && agendamento.status !== 'Cancelado' && agendamento.status !== 'Faltou') {
                 btnEditarAgendamento.style.display = 'block';
+                btnEditarAgendamento.replaceWith(btnEditarAgendamento.cloneNode(true));
+                document.getElementById('btn-editar-agendamento').addEventListener('click', () => {
+                    modal.hide();
+                    const timeStr = `${String(dataObj.getUTCHours()).padStart(2, '0')}:${String(dataObj.getUTCMinutes()).padStart(2, '0')}`;
+                    this.openNewAppointmentModal(timeStr);
+
+                    // Preencher campos com dados existentes
+                    setTimeout(() => {
+                        document.getElementById('paciente-select').value = agendamento.paciente.nome;
+                        document.getElementById('paciente-cpf').value = agendamento.paciente.cpf;
+
+                        if (this.inputPacienteCep) this.inputPacienteCep.value = agendamento.paciente.cep || '';
+                        if (this.inputPacienteLogradouro) this.inputPacienteLogradouro.value = agendamento.paciente.logradouro || '';
+                        if (this.inputPacienteNumero) this.inputPacienteNumero.value = agendamento.paciente.numero || '';
+                        if (this.inputPacienteComplemento) this.inputPacienteComplemento.value = agendamento.paciente.complemento || '';
+                        if (this.inputPacienteBairro) this.inputPacienteBairro.value = agendamento.paciente.bairro || '';
+                        if (this.inputPacienteCidade) this.inputPacienteCidade.value = agendamento.paciente.cidade || '';
+                        if (this.inputPacienteEstado) this.inputPacienteEstado.value = agendamento.paciente.estado || '';
+
+                        document.getElementById('tipo-consulta').value = agendamento.tipoConsulta;
+                        document.getElementById('data-consulta').value = agendamento.data.split('T')[0];
+                        this.selectedPacienteId = agendamento.pacienteId;
+                        this.editingAppointmentId = agendamento.id; // Mark as editing
+                    }, 200);
+                });
+
                 if (actionEdit) {
                     actionEdit.style.display = 'inline-flex';
                     actionEdit.onclick = () => document.getElementById('btn-editar-agendamento').click();
@@ -1685,11 +1914,11 @@ class AgendaManager {
         } catch (error) {
             modalTitle.textContent = 'Erro ao Carregar Detalhes';
             modalContentArea.innerHTML = `
-                <div class="alert alert-danger text-center p-4 m-4">
-                    <i class="bi bi-bug me-2"></i>Falha ao carregar os detalhes do agendamento.
-                    <p class="text-muted small mt-2">${error.message}</p>
-                </div>
-            `;
+                    <div class="alert alert-danger text-center p-4 m-4">
+                        <i class="bi bi-bug me-2"></i>Falha ao carregar os detalhes do agendamento.
+                        <p class="text-muted small mt-2">${error.message}</p>
+                    </div>
+                `;
             btnIniciarAtendimento.style.display = 'none';
             btnCancelarAgendamento.style.display = 'none';
             btnEditarAgendamento.style.display = 'none';
@@ -1712,7 +1941,6 @@ class AgendaManager {
             const horaConsultaEl = document.getElementById('hora-consulta');
 
             if (dataConsultaEl && horaConsultaEl) {
-                // Validação será feita apenas no avanço/salvar para evitar alertas durante digitação.
                 const validateSilently = async () => {
                     if (!dataConsultaEl.value) return;
                     if (!horaConsultaEl.value || horaConsultaEl.value.length < 5) {
@@ -1723,7 +1951,6 @@ class AgendaManager {
                     }
                     const ok = await this.validateAppointmentTime(dataConsultaEl.value, horaConsultaEl.value, true);
                     horaConsultaEl.classList.toggle('is-invalid', !ok);
-
                     let fb = horaConsultaEl.parentElement.querySelector('.hora-feedback');
                     if (!ok) {
                         if (!fb) {
@@ -1737,7 +1964,7 @@ class AgendaManager {
                             link.addEventListener('click', () => {
                                 const card = document.getElementById('horarios-livres-card');
                                 if (card) {
-                                    card.scrollIntoView({behavior: 'smooth', block: 'start'});
+                                    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
                                     card.classList.add('highlight-card');
                                     setTimeout(() => card.classList.remove('highlight-card'), 1200);
                                 }
@@ -1751,7 +1978,6 @@ class AgendaManager {
                         fb.remove();
                     }
                 };
-
                 dataConsultaEl.addEventListener('change', validateSilently);
                 horaConsultaEl.addEventListener('blur', validateSilently);
             }
@@ -1759,41 +1985,316 @@ class AgendaManager {
 
         if (this.inputPacienteNome) {
             this.inputPacienteNome.addEventListener('input', () => {
+                this.inputChanged(); // Better check for manual changes
                 clearTimeout(this.searchTimeout);
+
+                const val = this.inputPacienteNome.value;
+                if (!val) {
+                    this.closeSuggestions();
+                    return;
+                }
+
                 this.searchTimeout = setTimeout(() => {
-                    this.handlePacienteSearch(this.inputPacienteNome.value);
+                    this.handlePacienteSearch(val);
                 }, 300);
+            });
+
+            // Fechar sugestões ao clicar fora
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('#paciente-search-container')) {
+                    this.closeSuggestions();
+                }
+            });
+
+            const clearBtn = document.getElementById('clear-paciente');
+            if (clearBtn) {
+                clearBtn.addEventListener('click', () => {
+                    this.inputPacienteNome.value = '';
+                    this.inputPacienteNome.readOnly = false;
+                    this.inputPacienteCpf.value = '';
+
+                    if (this.inputPacienteCep) this.inputPacienteCep.value = '';
+                    if (this.inputPacienteLogradouro) this.inputPacienteLogradouro.value = '';
+                    if (this.inputPacienteNumero) this.inputPacienteNumero.value = '';
+                    if (this.inputPacienteComplemento) this.inputPacienteComplemento.value = '';
+                    if (this.inputPacienteBairro) this.inputPacienteBairro.value = '';
+                    if (this.inputPacienteCidade) this.inputPacienteCidade.value = '';
+                    if (this.inputPacienteEstado) this.inputPacienteEstado.value = '';
+
+                    this.selectedPacienteId = null;
+                    this.selectedPacienteOriginalName = null;
+                    clearBtn.style.display = 'none';
+                    this.inputPacienteNome.focus();
+                });
+            }
+        }
+
+        // Lógica de CEP no Agendamento
+        const btnCep = document.getElementById('btn-consulta-cep-agenda');
+        if (btnCep) {
+            btnCep.addEventListener('click', async () => {
+                const cepInput = document.getElementById('paciente-cep');
+                let cep = (cepInput?.value || '').replace(/\D/g, '');
+
+                if (cep.length !== 8) {
+                    return UI.info('CEP Inválido', 'Por favor, informe um CEP com 8 dígitos.');
+                }
+
+                btnCep.disabled = true;
+                const originalHtml = btnCep.innerHTML;
+                btnCep.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
+                try {
+                    const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+                    const data = await response.json();
+
+                    if (data.erro) {
+                        UI.error('CEP não encontrado', 'Verifique o número digitado.');
+                    } else {
+                        document.getElementById('paciente-logradouro').value = data.logradouro || '';
+                        document.getElementById('paciente-bairro').value = data.bairro || '';
+                        document.getElementById('paciente-cidade').value = data.localidade || '';
+                        document.getElementById('paciente-estado').value = data.uf || '';
+                        document.getElementById('paciente-numero').focus();
+                    }
+                } catch (e) {
+                    UI.error('Erro de conexão', 'Não foi possível consultar o CEP.');
+                } finally {
+                    btnCep.disabled = false;
+                    btnCep.innerHTML = originalHtml;
+                }
             });
         }
     }
 
-    // --- PESQUISA DE PACIENTES ---
+    closeSuggestions() {
+        const resultsContainer = document.getElementById('paciente-search-results');
+        if (resultsContainer) {
+            resultsContainer.innerHTML = '';
+            resultsContainer.classList.remove('show');
+        }
+    }
+
     async handlePacienteSearch(query) {
+        const resultsContainer = document.getElementById('paciente-search-results');
+        if (!resultsContainer) return;
+
         if (query.length < 2) {
-            this.datalistPacientes.innerHTML = '';
+            this.closeSuggestions();
             return;
         }
 
         try {
             const data = await AgendaAPI.searchPacientes(query);
-            this.datalistPacientes.innerHTML = '';
+            resultsContainer.innerHTML = '';
 
             if (data.pacientes && data.pacientes.length > 0) {
+                resultsContainer.classList.add('show');
                 data.pacientes.forEach(p => {
-                    const option = document.createElement('option');
-                    option.value = p.nome;
-                    option.textContent = `${p.nome} - CPF: ${p.cpf}`;
-                    option.dataset.cpf = p.cpf;
-                    option.dataset.endereco = p.endereco || '';
-                    this.datalistPacientes.appendChild(option);
-                });
-            }
+                    const item = document.createElement('div');
+                    item.className = 'paciente-suggestion-item p-3 border-bottom cursor-pointer d-flex align-items-center gap-3';
 
+                    const patientPhoto = p.foto
+                        ? `<img src="${p.foto}" class="avatar-agenda-search">`
+                        : `<div class="avatar-agenda-search">${p.nome.charAt(0).toUpperCase()}</div>`;
+
+                    item.innerHTML = `
+                        ${patientPhoto}
+                        <div class="flex-grow-1">
+                            <div class="name fw-bold text-dark">${p.nome}</div>
+                            <div class="details small text-muted">CPF: ${p.cpf} ${p.email ? ' | ' + p.email : ''}</div>
+                        </div>
+                        <i class="bi bi-plus-circle text-primary opacity-50"></i>
+                    `;
+                    item.onclick = () => this.selectPaciente(p);
+                    resultsContainer.appendChild(item);
+                });
+            } else {
+                resultsContainer.innerHTML = '<div class="p-3 text-center text-muted small">Nenhum paciente encontrado.</div>';
+                resultsContainer.classList.add('show');
+            }
         } catch (error) {
             console.error("Erro ao buscar pacientes:", error);
         }
     }
+
+    inputChanged() {
+        // Se o nome foi alterado manualmente e não bate com o original selecionado, limpamos o ID
+        if (this.selectedPacienteId && this.inputPacienteNome && this.inputPacienteNome.value !== this.selectedPacienteOriginalName) {
+            this.selectedPacienteId = null;
+            this.selectedPacienteOriginalName = null;
+        }
+    }
+
+    selectPaciente(p) {
+        if (this.inputPacienteNome) {
+            this.inputPacienteNome.value = p.nome;
+            this.inputPacienteNome.readOnly = true;
+            this.selectedPacienteOriginalName = p.nome;
+            const clearBtn = document.getElementById('clear-paciente');
+            if (clearBtn) clearBtn.style.display = 'inline-block';
+        }
+        if (this.inputPacienteCpf) {
+            this.inputPacienteCpf.value = p.cpf || '';
+            const event = new Event('input', { bubbles: true });
+            this.inputPacienteCpf.dispatchEvent(event);
+        }
+
+        if (this.inputPacienteCep) this.inputPacienteCep.value = p.cep || '';
+        if (this.inputPacienteLogradouro) this.inputPacienteLogradouro.value = p.logradouro || '';
+        if (this.inputPacienteNumero) this.inputPacienteNumero.value = p.numero || '';
+        if (this.inputPacienteComplemento) this.inputPacienteComplemento.value = p.complemento || '';
+        if (this.inputPacienteBairro) this.inputPacienteBairro.value = p.bairro || '';
+        if (this.inputPacienteCidade) this.inputPacienteCidade.value = p.cidade || '';
+        if (this.inputPacienteEstado) this.inputPacienteEstado.value = p.estado || '';
+
+        this.selectedPacienteId = p.id;
+        this.closeSuggestions();
+    }
 }
+
+// =========================================================
+// CLASSE: MONITORING & INNOVATION ENGINE
+// =========================================================
+class MonitoringEngine {
+    constructor(agendaManager) {
+        this.am = agendaManager;
+        this.init();
+        this.loadPreferences();
+    }
+
+    init() {
+        // Inicializar botões do painel lateral
+        const btnOpen = document.getElementById('btn-open-config');
+        const btnClose = document.getElementById('btn-close-config');
+        const panel = document.getElementById('config-panel');
+
+        if (btnOpen) btnOpen.onclick = () => panel.classList.add('open');
+        if (btnClose) btnClose.onclick = () => panel.classList.remove('open');
+
+        // Escutar cliques fora do painel para fechar
+        document.addEventListener('mousedown', (e) => {
+            if (panel.classList.contains('open') && !panel.contains(e.target) && e.target !== btnOpen) {
+                panel.classList.remove('open');
+            }
+        });
+
+        // Configurar Toggles de Tema
+        document.querySelectorAll('.theme-blob').forEach(blob => {
+            blob.addEventListener('click', () => {
+                document.querySelectorAll('.theme-blob').forEach(b => b.classList.remove('active'));
+                blob.classList.add('active');
+                this.applyTheme(blob.dataset.theme);
+            });
+        });
+
+        // Configurar Botão de Salvar
+        const btnSave = document.getElementById('btn-save-preferences');
+        if (btnSave) btnSave.onclick = () => this.saveCurrentPrefs();
+    }
+
+    loadPreferences() {
+        const prefs = window.userPreferences || {};
+        if (prefs.theme) {
+            this.applyTheme(prefs.theme);
+            // Atualizar UI do seletor
+            document.querySelectorAll('.theme-blob').forEach(b => {
+                b.classList.toggle('active', b.dataset.theme === prefs.theme);
+            });
+        }
+        if (prefs.widgets) {
+            this.applyWidgetVisibility(prefs.widgets);
+            // Atualizar UI dos switches
+            document.querySelectorAll('.widget-toggle').forEach(toggle => {
+                const wid = toggle.dataset.wid;
+                const input = toggle.querySelector('.form-check-input');
+                if (input) input.checked = prefs.widgets.includes(wid);
+            });
+        }
+    }
+
+    applyTheme(theme) {
+        document.body.className = ''; // Limpar classes
+        if (theme === 'dark') {
+            document.body.classList.add('theme-dark-mode');
+        } else if (theme === 'zen') {
+            document.body.classList.add('theme-zen-mode'); // Você pode adicionar CSS zen depois
+        }
+        // 'serious' é o padrão, não precisa de classe extra se o CSS base for ele
+    }
+
+    async saveCurrentPrefs() {
+        const theme = document.querySelector('.theme-blob.active')?.dataset.theme || 'serious';
+        const widgets = [];
+        document.querySelectorAll('.widget-toggle .form-check-input').forEach(input => {
+            if (input.checked) {
+                widgets.push(input.closest('.widget-toggle').dataset.wid);
+            }
+        });
+
+        const prefs = { theme, widgets };
+
+        try {
+            UI.loading('Sincronizando com o motor de preferências...');
+            await AgendaAPI.savePreferences(prefs);
+            UI.loading().close();
+            UI.success('Preferências Salvas', 'O painel foi adaptado com sucesso para o seu perfil profissional.');
+
+            // Re-aplicar widgets
+            this.applyWidgetVisibility(widgets);
+        } catch (e) {
+            UI.error('Erro ao salvar', 'Não foi possível sincronizar suas preferências.');
+        }
+    }
+
+    applyWidgetVisibility(widgets) {
+        document.querySelectorAll('.monitor-card').forEach(card => {
+            const wid = card.dataset.widget;
+            card.style.display = widgets.includes(wid) ? 'block' : 'none';
+        });
+    }
+
+    /**
+     * @description Atualiza as métricas avançadas do Command Center com base nos dados reais da agenda
+     */
+    updateMetrics(data) {
+        const compromissos = data.compromissos || [];
+        const now = new Date();
+        const nowStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+        // 1. Próximo Paciente
+        const futuros = compromissos
+            .filter(c => c.status !== 'Cancelado' && c.status !== 'Atendido')
+            .sort((a, b) => new Date(a.data) - new Date(b.data));
+
+        const next = futuros[0];
+        const nextEl = document.getElementById('monitor-next-patient');
+        const nextTimeEl = document.getElementById('monitor-next-time');
+
+        if (next) {
+            nextEl.textContent = next.paciente.nome;
+            const d = new Date(next.data);
+            nextTimeEl.textContent = `${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}`;
+        } else {
+            nextEl.textContent = 'Sem agendamentos';
+            nextTimeEl.textContent = '--:--';
+        }
+
+        // 2. Eficiência (Atendidos / Total Ativos)
+        const totaisAtivos = compromissos.filter(c => c.status !== 'Cancelado').length;
+        const atendidos = compromissos.filter(c => c.status === 'Atendido').length;
+        const eff = totaisAtivos > 0 ? Math.round((atendidos / totaisAtivos) * 100) : 0;
+        document.getElementById('monitor-eff').textContent = `${eff}%`;
+
+        // 3. Sala de Espera (Confirmados mas não Atendidos)
+        const waiting = compromissos.filter(c => c.status === 'Confirmado').length;
+        document.getElementById('monitor-waiting').textContent = waiting;
+
+        // 4. Atendidos Real
+        document.getElementById('monitor-attained').textContent = atendidos;
+    }
+}
+
 
 document.addEventListener('DOMContentLoaded', () => {
     if (typeof medicoId === 'undefined') {
@@ -1804,7 +2305,20 @@ document.addEventListener('DOMContentLoaded', () => {
     window.miniCalendar = new MiniCalendar();
     window.miniCalendar.render();
 
-    if (document.getElementById('escalaModal')) {
-        window.EscalaManager = new EscalaManager();
-    }
+
+    // Iniciar Motor Avançado de Monitoramento (caso queira metrics ocultas)
+    window.MonitoringEngine = new MonitoringEngine(window.AgendaManager);
+
+    // Sobrescrever o loadDay do AgendaManager para atualizar as métricas avançadas
+    const originalLoadDay = window.AgendaManager.loadDay.bind(window.AgendaManager);
+    window.AgendaManager.loadDay = async function (date) {
+        const res = await originalLoadDay(date);
+        // Os dados são carregados via API dentro do loadDay, então precisamos buscar novamente ou emitir evento
+        // Mas como AgendaAPI.getAgenda é chamado lá, podemos atualizar o Command Center
+        try {
+            const data = await AgendaAPI.getAgenda(date);
+            window.MonitoringEngine.updateMetrics(data);
+        } catch (e) { }
+        return res;
+    };
 });

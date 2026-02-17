@@ -1,7 +1,32 @@
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-class PacienteController {
+class MedicoController {
+  async updatePreferences(req, res, next) {
+    const { preferences } = req.body;
+    const userId = req.user.id;
+
+    if (!preferences) {
+      return res.status(400).json({ message: "Preferências não informadas." });
+    }
+
+    try {
+      const user = await prisma.user.update({
+        where: { id: userId },
+        data: { preferences }
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: "Preferências atualizadas com sucesso.",
+        preferences: user.preferences
+      });
+    } catch (error) {
+      console.error("Erro ao atualizar preferências:", error);
+      return res.status(500).json({ message: "Erro interno ao atualizar preferências." });
+    }
+  }
+
   async create(req, res, next) {
     const { nome, cpf, nascimento, telefone, endereco, email } = req.body;
 
@@ -128,4 +153,4 @@ class PacienteController {
   }
 }
 
-export default new PacienteController();
+export default new MedicoController();

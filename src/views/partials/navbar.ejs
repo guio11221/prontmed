@@ -11,10 +11,11 @@
             <div class="input-group prontmed-search-group">
                 <span class="input-group-text"><i class="bi bi-search"></i></span>
                 <input type="search" class="form-control prontmed-search" placeholder="Buscar pacientes..."
-                    id="search-paciente-input" autocomplete="off" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Buscar pacientes">
+                    id="search-paciente-input" autocomplete="off" data-bs-toggle="dropdown" aria-expanded="false"
+                    aria-label="Buscar pacientes">
             </div>
-            <ul class="dropdown-menu prontmed-suggestions-card"
-                aria-labelledby="search-paciente-input" id="paciente-suggestions-list">
+            <ul class="dropdown-menu prontmed-suggestions-card" aria-labelledby="search-paciente-input"
+                id="paciente-suggestions-list">
             </ul>
         </div>
     </div>
@@ -24,37 +25,49 @@
                 <a href="/agenda" class="nav-link" data-path="agenda"><i class="bi bi-calendar3 me-1"></i>Agenda</a>
             </li>
             <li class="nav-item">
-                <a href="/pacientes" class="nav-link" data-path="pacientes"><i class="bi bi-people me-1"></i>Pacientes</a>
+                <a href="/pacientes" class="nav-link" data-path="pacientes"><i
+                        class="bi bi-people me-1"></i>Pacientes</a>
             </li>
             <li class="nav-item">
-                <a href="/relatorios" class="nav-link" data-path="relatorios"><i class="bi bi-file-earmark-text me-1"></i>Relatórios</a>
+                <a href="/relatorios" class="nav-link" data-path="relatorios"><i
+                        class="bi bi-file-earmark-text me-1"></i>Relatórios</a>
             </li>
 
             <% if (user.role==="ADMIN" ) { %>
                 <li class="nav-item">
-                    <a href="/medicos" class="nav-link" data-path="medicos"><i class="bi bi-person-badge me-1"></i>Médicos</a>
+                    <a href="/medicos" class="nav-link" data-path="medicos"><i
+                            class="bi bi-person-badge me-1"></i>Médicos</a>
                 </li>
                 <li class="nav-item">
-                    <a href="/usuarios" class="nav-link" data-path="usuarios"><i class="bi bi-person-gear me-1"></i>Usuários</a>
+                    <a href="/usuarios" class="nav-link" data-path="usuarios"><i
+                            class="bi bi-person-gear me-1"></i>Usuários</a>
                 </li>
-            <% } %>
+                <% } %>
 
-            <li class="nav-item">
-                <a href="/recursos" class="nav-link" data-path="recursos"><i class="bi bi-folder2-open me-1"></i>Recursos</a>
-            </li>
+                    <li class="nav-item">
+                        <a href="/recursos" class="nav-link" data-path="recursos"><i
+                                class="bi bi-folder2-open me-1"></i>Recursos</a>
+                    </li>
         </ul>
 
         <div class="dropdown ms-3">
-            <a href="#" class="text-white text-decoration-none user-menu-trigger" data-bs-toggle="dropdown" aria-expanded="false">
+            <a href="#" class="text-white text-decoration-none user-menu-trigger" data-bs-toggle="dropdown"
+                aria-expanded="false">
                 <i class="bi bi-person-circle fs-5"></i>
-                <span class="navbar-user-name"><%= user.nome %></span>
+                <span class="navbar-user-name">
+                    <%= user.nome %>
+                </span>
                 <span class="navbar-user-badge">Clínica</span>
             </a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuLink">
                 <li>
                     <h6 class="dropdown-header user-dropdown-header">
-                        <div class="user-name"><%= user.nome %></div>
-                        <div class="user-role"><%= user.role %></div>
+                        <div class="user-name">
+                            <%= user.nome %>
+                        </div>
+                        <div class="user-role">
+                            <%= user.role %>
+                        </div>
                     </h6>
                 </li>
                 <li><a class="dropdown-item" href="/perfil"><i class="bi bi-person me-2"></i>Meu Perfil</a></li>
@@ -62,111 +75,19 @@
                     <li>
                         <hr class="dropdown-divider">
                     </li>
-                    <li><a class="dropdown-item" href="/admin/config"><i class="bi bi-gear me-2"></i>Configurações</a></li>
-                <% } %>
-                <li>
-                    <hr class="dropdown-divider">
-                </li>
-                <li><a class="dropdown-item text-danger" href="/logout"><i class="bi bi-box-arrow-right me-2"></i>Sair</a></li>
+                    <li><a class="dropdown-item" href="/admin/config"><i class="bi bi-gear me-2"></i>Configurações</a>
+                    </li>
+                    <% } %>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item text-danger" href="/logout"><i
+                                    class="bi bi-box-arrow-right me-2"></i>Sair</a></li>
             </ul>
         </div>
     </div>
 </nav>
 
 
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const input = document.getElementById('search-paciente-input');
-        const suggestionsList = document.getElementById('paciente-suggestions-list');
-        const searchDropdown = bootstrap.Dropdown.getOrCreateInstance(input.closest('.dropdown')); // Initialize once
-        let searchTimeout;
-
-        // =========================================================
-        // 1. Marcação da Página Atual (Ativar Link do Menu)
-        // =========================================================
-        const highlightCurrentPage = () => {
-            const pathSegments = window.location.pathname.split('/');
-            const rootPath = pathSegments[1] || 'agenda';
-            
-            const navLinks = document.querySelectorAll('.nav-links-container .nav-link');
-
-            navLinks.forEach(link => {
-                link.classList.remove('active');
-                
-                const linkPath = link.getAttribute('data-path'); 
-
-                if (linkPath === rootPath) {
-                    link.classList.add('active');
-                }
-            });
-        };
-
-        highlightCurrentPage();
-
-        // =========================================================
-        // 2. Lógica de Busca de Pacientes (Busca e Renderização)
-        // =========================================================
-
-        const fetchSuggestions = async (query) => {
-            if (query.length < 3) {
-                searchDropdown.hide();
-                return;
-            }
-            
-            suggestionsList.innerHTML = `<li><a class="dropdown-item disabled">Carregando...</a></li>`;
-            searchDropdown.show();
-
-
-            try {
-                const response = await fetch(`/pacientes/search?q=${encodeURIComponent(query)}`);
-                const pacientesData = await response.json();
-                
-                renderSuggestions(pacientesData.pacientes || []); 
-
-            } catch (error) {
-                console.error('Erro ao buscar pacientes:', error);
-                suggestionsList.innerHTML = `<li><a class="dropdown-item text-danger">Falha na conexão ou API.</a></li>`;
-            }
-        };
-
-        const renderSuggestions = (pacientes) => {
-            suggestionsList.innerHTML = '';
-
-            if (pacientes.length === 0) {
-                suggestionsList.innerHTML = `<li><a class="dropdown-item disabled">Nenhum paciente encontrado.</a></li>`;
-                searchDropdown.show();
-                return;
-            }
-
-            pacientes.forEach(paciente => {
-                const li = document.createElement('li');
-                const newRoute = `/pacientes/${paciente.id}/ficha`;
-
-                li.innerHTML = `
-                    <a class="dropdown-item paciente-suggestion-item" href="${newRoute}">
-                        <div class="name">${paciente.nome}</div>
-                        <div class="details">${paciente.cpf ? `CPF: <strong>${paciente.cpf}</strong>` : ''}</div>
-                    </a>
-                `;
-                suggestionsList.appendChild(li);
-            });
-
-            searchDropdown.show();
-        };
-
-        input.addEventListener('input', (e) => {
-            const query = e.target.value.trim();
-            clearTimeout(searchTimeout);
-
-            searchTimeout = setTimeout(() => {
-                fetchSuggestions(query);
-            }, 300);
-        });
-        
-        document.addEventListener('click', (e) => {
-            if (!input.closest('.dropdown').contains(e.target)) {
-                searchDropdown.hide();
-            }
-        });
-    });
+});
 </script>

@@ -5,9 +5,9 @@ import flash from "server-connect.io";
 import expressSession from "express-session";
 import passport from "passport";
 import expressEjsLayouts from "express-ejs-layouts";
-import {PrismaSessionStore} from '@quixo3/prisma-session-store';
-import {fileURLToPath} from "url";
-import {PrismaClient} from '@prisma/client';
+import { PrismaSessionStore } from '@quixo3/prisma-session-store';
+import { fileURLToPath } from "url";
+import { PrismaClient } from '@prisma/client';
 
 // Reconstrói __dirname no contexto ES Module
 const __filename = fileURLToPath(import.meta.url);
@@ -37,7 +37,7 @@ app.use(
         )
     })
 );
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
 app.use(morgan('dev'));
 app.set("view engine", "ejs");
 app.set("views", path.join(process.cwd(), "src/views"));
@@ -45,7 +45,7 @@ app.use(expressEjsLayouts);
 app.set('layout', 'layouts/main');
 // --- Arquivos Estáticos ---
 app.use(express.static(path.join(__dirname, "../../public")));
-app.use(express.urlencoded({extended: true}));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());

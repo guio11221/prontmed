@@ -8,7 +8,7 @@ export default class AgendaController {
     async get(req, res, next) {
         try {
             const { date } = req.query;
-            const user = req.user; 
+            const user = req.user;
             let where = {};
 
             if (user && user.role !== "ADMIN") {
@@ -37,12 +37,12 @@ export default class AgendaController {
                 return res.json({ compromissos });
             }
 
-            return res.render("agenda/agenda", { 
-                user: req.user, 
-                compromissos, 
+            return res.render("agenda/agenda", {
+                user: req.user,
+                compromissos,
                 title: 'Agenda',
-                erro: req.flash("erro"), 
-                sucesso: req.flash("sucesso") 
+                erro: req.flash("erro"),
+                sucesso: req.flash("sucesso")
             });
 
         } catch (err) {
@@ -85,7 +85,13 @@ export default class AgendaController {
             pacienteId,
             pacienteNome,
             pacienteCpf,
-            pacienteEndereco,
+            cep,
+            logradouro,
+            numero,
+            complemento,
+            bairro,
+            cidade,
+            estado,
             medicoId,
             data,
             tipoConsulta,
@@ -108,16 +114,19 @@ export default class AgendaController {
                         data: {
                             nome: pacienteNome,
                             cpf: pacienteCpf,
-                            endereco: pacienteEndereco || null,
+                            cep,
+                            logradouro,
+                            numero,
+                            complemento,
+                            bairro,
+                            cidade,
+                            estado,
                             nascimento: new Date('1900-01-01'),
                         },
                     });
-                } else if (paciente.nome !== pacienteNome || paciente.endereco !== pacienteEndereco) {
-                    paciente = await prisma.paciente.update({
-                        where: { id: paciente.id },
-                        data: { nome: pacienteNome, endereco: pacienteEndereco || null }
-                    });
                 }
+                // We no longer update the patient's name/address here to prevent accidental global changes.
+                // If a patient with this CPF exists, we use the existing record as-is.
 
                 finalPacienteId = paciente.id;
             }

@@ -1,0 +1,335 @@
+<link rel="stylesheet" href="../../assets/css/ficha_premium.css">
+
+<% const todayDate=new Date(); const nascimento=new Date(paciente.nascimento); let idade=todayDate.getFullYear() -
+    nascimento.getFullYear(); const m=todayDate.getMonth() - nascimento.getMonth(); if (m < 0 || (m===0 &&
+    todayDate.getDate() < nascimento.getDate())) { idade--; } const patientPhoto=paciente.foto ? `<img
+    src="${paciente.foto}" class="avatar-serious shadow-sm" id="avatar-preview-img">`
+    : `<div class="avatar-serious shadow-sm" id="avatar-initials">${paciente.nome.charAt(0).toUpperCase()}</div><img
+        src="" id="avatar-preview-img" class="avatar-serious shadow-sm d-none">`;
+    %>
+
+    <div class="medical-container">
+        <!-- TOP BAR -->
+        <header class="medical-top-bar">
+            <div class="medical-brand-id">
+                <a href="/pacientes" class="btn btn-outline-secondary btn-sm me-3">
+                    <i class="bi bi-chevron-left"></i> Voltar
+                </a>
+                <h5 class="mb-0 fw-800 text-dark">FICHA DO PACIENTE</h5>
+            </div>
+            <div class="header-meta">
+                <span class="text-muted small fw-bold me-2">PRONTUÁRIO:</span>
+                <span class="id-badge">PM-<%= String(paciente.id).padStart(5, '0' ) %></span>
+            </div>
+        </header>
+
+        <div class="medical-grid">
+            <!-- SIDEBAR -->
+            <aside>
+                <div class="medical-card">
+                    <div class="patient-profile-top">
+                        <div class="position-relative d-inline-block cursor-pointer" id="avatar-trigger"
+                            title="Alterar Foto">
+                            <%- patientPhoto %>
+                                <div class="position-absolute bottom-0 end-0 bg-dark text-white rounded-circle d-flex align-items-center justify-content-center shadow"
+                                    style="width: 32px; height: 32px; border: 2px solid #fff;">
+                                    <i class="bi bi-camera-fill small"></i>
+                                </div>
+                        </div>
+                        <h2 class="patient-name-serious mt-3 mb-0">
+                            <%= paciente.nome %>
+                        </h2>
+                        <div class="text-muted small fw-bold">CPF: <%= paciente.cpf %>
+                        </div>
+                    </div>
+
+                    <div class="clinical-dashboard-list">
+                        <div class="dashboard-item">
+                            <span class="item-label">Status</span>
+                            <span class="item-value text-success"><i class="bi bi-circle-fill me-1 small"></i>
+                                ATIVO</span>
+                        </div>
+                        <div class="dashboard-item">
+                            <span class="item-label">Idade</span>
+                            <span class="item-value">
+                                <%= idade %> Anos
+                            </span>
+                        </div>
+                        <div class="dashboard-item">
+                            <span class="item-label">Tipo Sanguíneo</span>
+                            <span class="item-value fw-800 color-med-blue">
+                                <%= paciente.tipoSanguineo || 'N/I' %>
+                            </span>
+                        </div>
+                        <div class="dashboard-item">
+                            <span class="item-label">Último Atendimento</span>
+                            <span class="item-value">
+                                <%= (paciente.agendas && paciente.agendas.length> 0) ? new
+                                    Date(paciente.agendas[0].data).toLocaleDateString('pt-BR') : 'Não registrado' %>
+                            </span>
+                        </div>
+
+                        <% if (paciente.alergias) { %>
+                            <div class="alert-clinical-box alert-danger mt-4">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <i class="bi bi-exclamation-triangle-fill"></i>
+                                    <span>ALERGIAS / RISCOS</span>
+                                </div>
+                                <div class="text-uppercase">
+                                    <%= paciente.alergias %>
+                                </div>
+                            </div>
+                            <% } else { %>
+                                <div class="alert-clinical-box alert-safe mt-4">
+                                    <i class="bi bi-shield-check me-2"></i> SEM ALERGIAS REGISTRADAS
+                                </div>
+                                <% } %>
+
+                                    <div class="mt-4 d-grid gap-2">
+                                        <button class="btn btn-primary fw-bold"
+                                            onclick="location.href='/atendimento/novo/<%= paciente.id %>'">
+                                            <i class="bi bi-plus-lg me-2"></i> INICIAR CONSULTA
+                                        </button>
+                                    </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- MAIN -->
+            <main>
+                <div class="medical-card">
+                    <nav class="medical-tabs nav nav-tabs border-0" id="pacienteTabsMenu">
+                        <button class="med-tab active nav-link" data-bs-toggle="tab"
+                            data-bs-target="#m-tab-dados">CADASTRO ADMINISTRATIVO</button>
+                        <button class="med-tab nav-link" data-bs-toggle="tab" data-bs-target="#m-tab-historia">HISTÓRICO
+                            DE ATENDIMENTOS</button>
+                    </nav>
+
+                    <div class="tab-content">
+                        <!-- TAB DADOS -->
+                        <div class="tab-pane fade show active" id="m-tab-dados">
+                            <form action="/pacientes/<%= paciente.id %>/update" method="POST" class="medical-form-grid">
+                                <div class="med-input-group full-width">
+                                    <label>Nome Completo do Paciente</label>
+                                    <input type="text" name="nome" class="med-input" value="<%= paciente.nome %>"
+                                        required>
+                                </div>
+
+                                <div class="med-input-group">
+                                    <label>Documento CPF</label>
+                                    <input type="text" name="cpf" class="med-input" value="<%= paciente.cpf %>"
+                                        required>
+                                </div>
+                                <div class="med-input-group">
+                                    <label>Data de Nascimento</label>
+                                    <input type="date" name="nascimento" class="med-input"
+                                        value="<%= new Date(paciente.nascimento).toISOString().split('T')[0] %>"
+                                        required>
+                                </div>
+
+                                <div class="med-input-group">
+                                    <label>Tipo Sanguíneo</label>
+                                    <select name="tipoSanguineo" class="med-input">
+                                        <option value="" <%=!paciente.tipoSanguineo ? 'selected' : '' %>>Não informado
+                                        </option>
+                                        <% ['A+', 'A-' , 'B+' , 'B-' , 'AB+' , 'AB-' , 'O+' , 'O-' ].forEach(tipo=> { %>
+                                            <option value="<%= tipo %>" <%=paciente.tipoSanguineo===tipo ? 'selected'
+                                                : '' %>><%= tipo %>
+                                            </option>
+                                            <% }) %>
+                                    </select>
+                                </div>
+                                <div class="med-input-group">
+                                    <label>Alergias e Restrições</label>
+                                    <input type="text" name="alergias" class="med-input"
+                                        value="<%= paciente.alergias %>" placeholder="Listar alergias clínicas...">
+                                </div>
+
+                                <div class="med-input-group">
+                                    <label>Telefone / Celular</label>
+                                    <input type="text" name="telefone" class="med-input"
+                                        value="<%= paciente.telefone %>">
+                                </div>
+                                <div class="med-input-group">
+                                    <label>Endereço de E-mail</label>
+                                    <input type="email" name="email" class="med-input" value="<%= paciente.email %>">
+                                </div>
+
+                                <div class="section-title full-width"><i class="bi bi-geo-alt-fill"></i> Endereço
+                                    Residencial</div>
+
+                                <div class="med-input-group">
+                                    <label>CEP (Auto-consulta)</label>
+                                    <input type="text" name="cep" id="cep-input" class="med-input"
+                                        value="<%= paciente.cep %>" placeholder="00000-000" maxlength="9">
+                                </div>
+
+                                <div class="med-input-group">
+                                    <label>Logradouro (Rua/Av)</label>
+                                    <input type="text" name="logradouro" id="logradouro-input" class="med-input"
+                                        value="<%= paciente.logradouro %>">
+                                </div>
+
+                                <div class="med-input-group">
+                                    <label>Número</label>
+                                    <input type="text" name="numero" class="med-input" value="<%= paciente.numero %>">
+                                </div>
+
+                                <div class="med-input-group">
+                                    <label>Complemento</label>
+                                    <input type="text" name="complemento" class="med-input"
+                                        value="<%= paciente.complemento %>">
+                                </div>
+
+                                <div class="med-input-group">
+                                    <label>Bairro</label>
+                                    <input type="text" name="bairro" id="bairro-input" class="med-input"
+                                        value="<%= paciente.bairro %>">
+                                </div>
+
+                                <div class="med-input-group">
+                                    <label>Cidade</label>
+                                    <input type="text" name="cidade" id="cidade-input" class="med-input"
+                                        value="<%= paciente.cidade %>">
+                                </div>
+
+                                <div class="med-input-group">
+                                    <label>Estado (UF)</label>
+                                    <input type="text" name="estado" id="estado-input" class="med-input"
+                                        value="<%= paciente.estado %>">
+                                </div>
+
+                                <input type="hidden" name="foto" id="foto-base64" value="<%= paciente.foto %>">
+                                <input type="file" id="foto-uploader" class="d-none" accept="image/*">
+
+                                <div class="full-width mt-4 pt-4 border-top text-end">
+                                    <button type="submit" class="btn-save-serious px-5 shadow-sm">
+                                        <i class="bi bi-check2-circle me-2"></i> ATUALIZAR REGISTRO CLÍNICO
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- TAB HISTORIA -->
+                        <div class="tab-pane fade" id="m-tab-historia">
+                            <div class="p-0">
+                                <table class="medical-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Data / Hora</th>
+                                            <th>Tipo de Consulta</th>
+                                            <th>Profissional Resp.</th>
+                                            <th>Status</th>
+                                            <th class="text-end">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% if (paciente.agendas && paciente.agendas.length> 0) { %>
+                                            <% paciente.agendas.forEach(ag=> { %>
+                                                <tr>
+                                                    <td class="fw-bold">
+                                                        <%= new Date(ag.data).toLocaleDateString('pt-BR') %>
+                                                            <%= new Date(ag.data).toLocaleTimeString('pt-BR',
+                                                                {hour: '2-digit' , minute:'2-digit'}) %>
+                                                    </td>
+                                                    <td>
+                                                        <%= ag.tipoConsulta %>
+                                                    </td>
+                                                    <td>Dr. <%= ag.medico.nome %>
+                                                    </td>
+                                                    <td><span class="badge bg-light text-dark border">
+                                                            <%= ag.status.toUpperCase() %>
+                                                        </span></td>
+                                                    <td class="text-end">
+                                                        <button
+                                                            class="btn btn-outline-primary btn-sm rounded-1">Visualizar
+                                                            Prontuário</button>
+                                                    </td>
+                                                </tr>
+                                                <% }) %>
+                                                    <% } else { %>
+                                                        <tr>
+                                                            <td colspan="5" class="text-center py-5 text-muted italic">
+                                                                Nenhum atendimento registrado no histórico deste
+                                                                paciente.</td>
+                                                        </tr>
+                                                        <% } %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const uploader = document.getElementById('foto-uploader');
+            const trigger = document.getElementById('avatar-trigger');
+            const hiddenField = document.getElementById('foto-base64');
+            const previewImg = document.getElementById('avatar-preview-img');
+            const initials = document.getElementById('avatar-initials');
+
+            if (trigger) trigger.addEventListener('click', () => uploader.click());
+
+            if (uploader) {
+                uploader.addEventListener('change', function (e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function (event) {
+                            const base64String = event.target.result;
+                            hiddenField.value = base64String;
+                            if (previewImg) {
+                                previewImg.src = base64String;
+                                previewImg.classList.remove('d-none');
+                            }
+                            if (initials) initials.classList.add('d-none');
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+
+            /* Lógica de Consulta de CEP */
+            const cepInput = document.getElementById('cep-input');
+            if (cepInput) {
+                cepInput.addEventListener('blur', function () {
+                    let cep = this.value.replace(/\D/g, '');
+
+                    if (cep.length === 8) {
+                        // Feedback visual de carregamento
+                        this.classList.add('is-loading');
+
+                        fetch(`https://viacep.com.br/ws/${cep}/json/`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (!data.erro) {
+                                    document.getElementById('logradouro-input').value = data.logradouro;
+                                    document.getElementById('bairro-input').value = data.bairro;
+                                    document.getElementById('cidade-input').value = data.localidade;
+                                    document.getElementById('estado-input').value = data.uf;
+
+                                    // Foco no número para agilizar
+                                    const numeroInput = document.getElementsByName('numero')[0];
+                                    if (numeroInput) numeroInput.focus();
+                                }
+                            })
+                            .catch(err => console.error("Erro ao buscar CEP:", err))
+                            .finally(() => {
+                                this.classList.remove('is-loading');
+                            });
+                    }
+                });
+
+                // Máscara simples para o CEP
+                cepInput.addEventListener('input', function () {
+                    let v = this.value.replace(/\D/g, '');
+                    if (v.length > 5) v = v.slice(0, 5) + '-' + v.slice(5, 8);
+                    this.value = v;
+                });
+            }
+        });
+    </script>

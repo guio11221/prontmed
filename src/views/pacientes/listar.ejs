@@ -1,5 +1,174 @@
-<div class="container-fluid mt-3">
+<link rel="stylesheet" href="../../assets/css/pacientes_styles.css">
 
+<div class="pacientes-container">
+    <!-- Header Area -->
+    <div class="page-header-premium">
+        <div class="header-title">
+            <h1>Gestão de Pacientes</h1>
+            <p class="mb-0">Acompanhamento centralizado e histórico de atendimento.</p>
+        </div>
+        <div class="header-actions d-flex gap-3 align-items-center">
+            <div class="search-box-premium">
+                <i class="bi bi-search"></i>
+                <input type="text" id="paciente-main-search" class="form-control"
+                    placeholder="Buscar por nome ou CPF...">
+            </div>
+            <button class="btn btn-primary rounded-pill px-4 d-flex align-items-center gap-2 fw-bold"
+                id="btn-novo-paciente">
+                <i class="bi bi-person-plus-fill"></i> NOVO PACIENTE
+            </button>
+        </div>
+    </div>
 
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+        <div class="filter-chip active" onclick="filterBy('all')">Todos</div>
+        <div class="filter-chip" onclick="filterBy('recent')">Adicionados Recentemente</div>
+        <div class="filter-chip" onclick="filterBy('active')">Com Agendamento</div>
+        <div class="filter-chip" onclick="filterBy('missing')">Dados Incompletos</div>
+    </div>
+
+    <!-- Stats Row (Compact & Premium) -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 d-flex flex-row align-items-center gap-3">
+                <div class="bg-primary-subtle p-3 rounded-4" style="color: var(--prontmed-blue-primary);">
+                    <i class="bi bi-people fs-4"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-0" style="color: var(--prontmed-text-strong);">
+                        <%= pacientes.length %>
+                    </h3>
+                    <p class="text-muted small mb-0">Total de Pacientes</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 d-flex flex-row align-items-center gap-3">
+                <div class="bg-success-subtle p-3 rounded-4" style="color: var(--prontmed-green-success);">
+                    <i class="bi bi-person-check fs-4"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-0" style="color: var(--prontmed-text-strong);">
+                        <%= pacientes.length %>
+                    </h3>
+                    <p class="text-muted small mb-0">Cadastros Ativos</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Table -->
+    <div class="card pacientes-card border-0">
+        <div class="table-responsive">
+            <table class="table table-premium align-middle" id="pacientes-table">
+                <thead>
+                    <tr>
+                        <th style="width: 80px;">Prontuário</th>
+                        <th>Identificação do Paciente</th>
+                        <th>Documentação</th>
+                        <th>Estado Clínico Atual</th>
+                        <th>Contato e Ações Rápidas</th>
+                        <th class="text-center">Operações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (pacientes && pacientes.length> 0) { %>
+                        <% pacientes.forEach(paciente=> { %>
+                            <tr class="patient-row" data-id="<%= paciente.id %>">
+                                <td>
+                                    <div class="patient-avatar position-relative overflow-hidden">
+                                        <% if (paciente.foto) { %>
+                                            <img src="<%= paciente.foto %>" alt="<%= paciente.nome %>"
+                                                style="width: 100%; height: 100%; object-fit: cover;">
+                                            <% } else { %>
+                                                <%= paciente.nome.charAt(0).toUpperCase() %>
+                                                    <% } %>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="patient-name d-flex align-items-center gap-2">
+                                        <%= paciente.nome %>
+                                    </div>
+                                    <div class="patient-info-row">
+                                        <i class="bi bi-calendar3"></i> Nasc: <%= new
+                                            Date(paciente.nascimento).toLocaleDateString('pt-BR') %>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        <code class="badge-cpf w-fit"><%= paciente.cpf %></code>
+                                        <span class="text-muted mt-1" style="font-size: 0.65rem; font-weight: 700;">ID
+                                            PRONT: PM-<%= String(paciente.id).padStart(5, '0' ) %></span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <% if (paciente.agendas && paciente.agendas.length> 0) {
+                                        const lastAgenda = paciente.agendas[0];
+                                        const statusClass = `status-${lastAgenda.status.toLowerCase()}`;
+                                        %>
+                                        <span class="clinical-status-badge <%= statusClass %>">
+                                            <%= lastAgenda.status %>
+                                        </span>
+                                        <div class="mt-1 small text-muted fw-medium">Última: <%= new
+                                                Date(lastAgenda.data).toLocaleDateString('pt-BR') %>
+                                        </div>
+                                        <% } else { %>
+                                            <span class="text-muted small italic">Sem histórico</span>
+                                            <% } %>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-column gap-1">
+                                        <div class="small fw-medium"><i class="bi bi-envelope-at me-2 text-muted"></i>
+                                            <%= paciente.email || '—' %>
+                                        </div>
+                                        <div class="clinical-shortcuts">
+                                            <a href="https://wa.me/<%= (paciente.telefone || '').replace(/\D/g, '') %>"
+                                                target="_blank" class="shortcut-btn btn-whatsapp"
+                                                title="Enviar WhatsApp">
+                                                <i class="bi bi-whatsapp"></i>
+                                            </a>
+                                            <button class="shortcut-btn btn-telemed" title="Iniciar Telemedicina">
+                                                <i class="bi bi-camera-video"></i>
+                                            </button>
+                                            <button class="shortcut-btn" title="Ver Histórico Clínico">
+                                                <i class="bi bi-journal-medical"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-action-group">
+                                        <a class="btn-action btn-view text-decoration-none"
+                                            href="/pacientes/<%= paciente.id %>/ficha" title="Ficha Completa">
+                                            <i class="bi bi-eye-fill"></i>
+                                        </a>
+                                        <a class="btn-action btn-edit text-decoration-none"
+                                            href="/pacientes/<%= paciente.id %>/ficha" title="Editar Cadastro">
+                                            <i class="bi bi-pencil-fill"></i>
+                                        </a>
+                                        <button class="btn-action btn-delete" title="Remover Registro">
+                                            <i class="bi bi-trash3-fill"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <% }); %>
+                                <% } else { %>
+                                    <tr>
+                                        <td colspan="6" class="text-center p-5">
+                                            <div class="opacity-50">
+                                                <i class="bi bi-person-vcard fs-1 d-block mb-3"></i>
+                                                <p class="mb-0">Nenhum paciente encontrado na base clínica.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
+
+<script src="../../assets/js/pacientes_script.js"></script>

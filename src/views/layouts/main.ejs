@@ -14,11 +14,43 @@
   <!-- CSS -->
   <link rel="stylesheet" href="../../assets/css/bootstrap.min.css" />
   <link rel="stylesheet" href="../../assets/css/plugins.min.css" />
+  <link rel="stylesheet" href="../../assets/css/global_styles.css" />
   <link rel="stylesheet" href="../../assets/css/demo.css" />
+  <style>
+    /* Estilos globais para o Motor de Layout */
+    .drag-handle {
+      cursor: grab;
+      padding: 4px 0;
+      text-align: center;
+      color: #cbd5e1;
+      font-size: 1.2rem;
+      transition: color 0.2s;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+    }
+
+    .drag-handle:hover {
+      color: #64748b;
+    }
+
+    .drag-handle:active {
+      cursor: grabbing;
+    }
+
+    .layout-ghost {
+      opacity: 0.4;
+      background: #e2e8f0 !important;
+      border: 2px dashed #94a3b8 !important;
+    }
+
+    .agenda-col {
+      position: relative;
+    }
+  </style>
 </head>
 
 <body>
-  <% if ((erro && erro.length > 0) || (sucesso && sucesso.length > 0)) { %>
+  <% if ((erro && erro.length> 0) || (sucesso && sucesso.length > 0)) { %>
     <script>
       Swal.fire({
         icon: "<%= erro && erro.length > 0 ? 'error' : 'success' %>",
@@ -29,30 +61,30 @@
         allowEscapeKey: false,
       });
     </script>
-  <% } %>
-  <%- include("../partials/navbar")%>
-  <!-- Aqui o conteúdo específico da página será injetado -->
-  <%- body %>
-    <script>
-      const medicoId = <%= user ? user.id : 0 %>
-    </script>
+    <% } %>
+      <%- include("../partials/navbar")%>
+        <!-- Aqui o conteúdo específico da página será injetado -->
+        <%- body %>
+          <script>
+            const medicoId = parseInt('<%= user ? user.id : 0 %>');
+          </script>
 
-    <!-- JS -->
-    <script src="../../assets/js/core/jquery-3.7.1.min.js"></script>
-    <script src="../../assets/js/core/popper.min.js"></script>
-    <script src="../../assets/js/core/bootstrap.min.js"></script>
-    <script src="../../assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
-    <script src="../../assets/js/plugin/chart.js/chart.min.js"></script>
-    <script src="../../assets/js/plugin/jquery.sparkline/jquery.sparkline.min.js"></script>
-    <script src="../../assets/js/plugin/chart-circle/circles.min.js"></script>
-    <script src="../../assets/js/plugin/datatables/datatables.min.js"></script>
-    <script src="../../assets/js/plugin/bootstrap-notify/bootstrap-notify.min.js"></script>
-    <script src="../../assets/js/plugin/jsvectormap/jsvectormap.min.js"></script>
-    <script src="../../assets/js/plugin/jsvectormap/world.js"></script>
-    <script src="../../assets/js/plugin/sweetalert/sweetalert.min.js"></script>
-    <script src="../../assets/js/kaiadmin.min.js"></script>
-    <script src="../../assets/js/setting-demo.js"></script>
-    <script src="../../assets/js/agenda_script.js"></script>
+          <!-- JS -->
+          <script src="../../assets/js/core/jquery-3.7.1.min.js"></script>
+          <script src="../../assets/js/core/popper.min.js"></script>
+          <script src="../../assets/js/core/bootstrap.min.js"></script>
+          <script src="../../assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+          <script src="../../assets/js/plugin/chart.js/chart.min.js"></script>
+          <script src="../../assets/js/plugin/jquery.sparkline/jquery.sparkline.min.js"></script>
+          <script src="../../assets/js/plugin/chart-circle/circles.min.js"></script>
+          <script src="../../assets/js/plugin/datatables/datatables.min.js"></script>
+          <script src="../../assets/js/plugin/bootstrap-notify/bootstrap-notify.min.js"></script>
+          <script src="../../assets/js/plugin/jsvectormap/jsvectormap.min.js"></script>
+          <script src="../../assets/js/plugin/jsvectormap/world.js"></script>
+          <script src="../../assets/js/plugin/sweetalert/sweetalert.min.js"></script>
+          <script src="../../assets/js/kaiadmin.min.js"></script>
+          <script src="../../assets/js/setting-demo.js"></script>
+          <script src="../../assets/js/agenda_script.js"></script>
 </body>
 
 </html>

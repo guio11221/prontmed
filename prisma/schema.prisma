@@ -16,6 +16,7 @@ model User {
   crm               String?              @unique
   especialidade     String?
   criadoEm          DateTime             @default(now())
+  preferences       String?              @default("{\"theme\":\"serious\",\"density\":\"comfortable\",\"widgets\":[\"stats\",\"waiting_room\",\"next_patient\"]}")
   agendasCriadas    Agenda[]             @relation("AgendamentoCriadoPor")
   agendasAtendidas  Agenda[]             @relation("AgendamentoMedico")
   escalas           EscalaTrabalho[]
@@ -28,9 +29,18 @@ model Paciente {
   cpf        String   @unique
   nascimento DateTime
   telefone   String?
-  endereco   String?
-  email      String?
-  agendas    Agenda[]
+  cep            String?
+  logradouro     String?
+  numero         String?
+  complemento    String?
+  bairro         String?
+  cidade         String?
+  estado         String?
+  email          String?
+  foto           String?  @default("")
+  tipoSanguineo  String?  @default("")
+  alergias       String?  @default("")
+  agendas        Agenda[]
 }
 
 model Agenda {

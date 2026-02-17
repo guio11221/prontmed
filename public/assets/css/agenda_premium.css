@@ -1,0 +1,275 @@
+/* 
+   =========================================================
+   ADVANCED CLINICAL MONITORING - PREMIUM SUITE
+   =========================================================
+*/
+
+:root {
+    --monitor-bg: #f8fafc;
+    --monitor-card-bg: #ffffff;
+    --monitor-accent: #004b8d;
+    --monitor-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.3);
+}
+
+.command-center {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+    perspective: 1000px;
+}
+
+.monitor-card {
+    background: var(--monitor-card-bg);
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid #e2e8f0;
+    box-shadow: var(--monitor-shadow);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    cursor: default;
+}
+
+.monitor-card:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.monitor-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(0, 75, 141, 0.05) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.monitor-card:hover::before {
+    opacity: 1;
+}
+
+.monitor-card .icon-box {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    background: #f1f5f9;
+    color: var(--monitor-accent);
+}
+
+.monitor-card.accent-blue .icon-box {
+    background: #e0f2fe;
+    color: #0369a1;
+}
+
+.monitor-card.accent-green .icon-box {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.monitor-card.accent-purple .icon-box {
+    background: #f3e8ff;
+    color: #7e22ce;
+}
+
+.monitor-card.accent-orange .icon-box {
+    background: #ffedd5;
+    color: #c2410c;
+}
+
+.monitor-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+    margin-bottom: 0.25rem;
+}
+
+.monitor-value {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #1e293b;
+    line-height: 1.2;
+}
+
+.monitor-footer {
+    margin-top: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+}
+
+.pulse-indicator {
+    width: 8px;
+    height: 8px;
+    background: #22c55e;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 0 rgba(34, 197, 94, 0.4);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+    }
+
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
+    }
+
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+    }
+}
+
+/* Customization Panel */
+.config-side-panel {
+    position: fixed;
+    right: -400px;
+    top: 0;
+    width: 350px;
+    height: 100vh;
+    background: var(--monitor-card-bg);
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
+    z-index: 1050;
+    transition: right 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+    padding: 2rem;
+    border-left: 1px solid #e2e8f0;
+}
+
+.config-side-panel.open {
+    right: 0;
+}
+
+.config-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.config-section {
+    margin-bottom: 2rem;
+}
+
+.config-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.theme-choice {
+    display: flex;
+    gap: 1rem;
+}
+
+.theme-blob {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: all 0.2s;
+}
+
+.theme-blob.active {
+    border-color: var(--monitor-accent);
+}
+
+.theme-blue {
+    background: #004b8d;
+}
+
+.theme-dark {
+    background: #1e293b;
+}
+
+.theme-green {
+    background: #059669;
+}
+
+.widget-toggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8fafc;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+}
+
+.widget-toggle:hover {
+    background: #f1f5f9;
+}
+
+.btn-premium-save {
+    background: linear-gradient(135deg, #004b8d 0%, #002d55 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 0.75rem;
+    width: 100%;
+    font-weight: 700;
+    margin-top: 2rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 75, 141, 0.3);
+}
+
+/* Dark Mode Adaptation */
+body.theme-dark-mode {
+    background: #0f172a;
+    color: #f1f5f9;
+}
+
+body.theme-dark-mode .monitor-card {
+    background: #1e293b;
+    border-color: #334155;
+}
+
+body.theme-dark-mode .monitor-value {
+    color: #f1f5f9;
+}
+
+body.theme-dark-mode .monitor-label {
+    color: #94a3b8;
+}
+
+/* Zen Clinic Theme */
+body.theme-zen-mode {
+    background: #f0fdf4;
+    color: #064e3b;
+}
+
+body.theme-zen-mode .monitor-card {
+    background: #ffffff;
+    border-color: #bbf7d0;
+    box-shadow: 0 4px 6px -1px rgba(5, 150, 105, 0.1);
+}
+
+body.theme-zen-mode .monitor-accent {
+    color: #059669;
+}
+
+body.theme-zen-mode .btn-premium-save {
+    background: linear-gradient(135deg, #059669 0%, #064e3b 100%);
+}

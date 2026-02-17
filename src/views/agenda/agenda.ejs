@@ -1,315 +1,405 @@
-<%
-const todayDate = new Date();
-const formattedDate = todayDate.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
-%>
+<% const todayDate=new Date(); const formattedDate=todayDate.toLocaleDateString('pt-BR', { weekday: 'long' ,
+    day: '2-digit' , month: 'long' , year: 'numeric' }); %>
 
-<link rel="stylesheet" href="../../assets/css/agenda_styles.css" />
-<div class="container-fluid mt-3 agenda-page">
-    <div class="agenda-header mb-3">
-        <div class="agenda-header-left">
-            <div class="agenda-title-block">
-                <h2 class="agenda-title">Agenda de Consultas</h2>
-                <span class="agenda-subtitle">Gestão diária de atendimentos</span>
-            </div>
-            <% if (user.role === "MEDICO") { %>
-            <button class="btn btn-success shadow-sm" id="nova-consulta" data-bs-toggle="modal" data-bs-target="#novaConsultaModal">
-                <i class="bi bi-plus-circle me-1"></i> Nova Consulta
-            </button>
-            <% } %>
-            <button class="btn btn-outline-secondary btn-sm" id="ir-para-hoje">Hoje</button>
-        </div>
-        
-        <div class="agenda-header-center">
-            <div class="agenda-date-nav">
-                <button class="btn btn-light agenda-nav-btn" id="prev-day" aria-label="Dia Anterior"><i class="bi bi-chevron-left"></i></button>
-                <button class="btn btn-light agenda-nav-btn" id="next-day" aria-label="Próximo Dia"><i class="bi bi-chevron-right"></i></button>
-                <span id="data-atual" class="fw-bold text-dark agenda-date-display"><%= formattedDate %></span>
-            </div>
-        </div>
-
-        <div class="agenda-header-right">
-            <div class="agenda-header-metrics">
-            <span class="metric-pill metric-total">Total <strong id="metric-total">0</strong></span>
-            <span class="metric-pill metric-agendadas">Agendadas <strong id="metric-agendadas">0</strong></span>
-            <span class="metric-pill metric-confirmadas">Confirmadas <strong id="metric-confirmadas">0</strong></span>
-            <span class="metric-pill metric-canceladas">Canceladas <strong id="metric-canceladas">0</strong></span>
-        </div>
-
-        <button class="btn btn-outline-secondary btn-sm agenda-print"><i class="bi bi-printer me-1"></i> Imprimir</button>
-        </div>
-    </div>
-
-    <div class="row g-3 agenda-layout">
-        <div class="col-md-3 agenda-col agenda-col-left">
-            <div class="card mb-3 agenda-card">
-                <div class="card-body calendar-sim">
-                    <div class="d-flex justify-content-between align-items-center mb-1 agenda-calendar-header">
-                        <span class="fw-bold text-primary" id="calendar-title">Outubro de 2025</span>
-                        <div>
-                            <button class="btn btn-sm p-0 me-1" id="prev-month-btn" aria-label="Mês Anterior"><i class="bi bi-chevron-left"></i></button>
-                            <button class="btn btn-sm p-0" id="next-month-btn" aria-label="Próximo Mês"><i class="bi bi-chevron-right"></i></button>
-                        </div>
-                    </div>
-                    <div class="calendar-legend">
-                        <span class="legend-dot"></span>
-                        <span>Dias com consultas</span>
-                    </div>
-
-                    <table class="table table-sm table-borderless text-center mb-0 agenda-calendar-table">
-                        <thead class="day-header">
-                            <tr><th>D</th><th>S</th><th>T</th><th>Q</th><th>Q</th><th>S</th><th>S</th></tr>
-                        </thead>
-                        <tbody id="calendar-body">
-                        </tbody>
-                    </table>
+    <link rel="stylesheet" href="../../assets/css/agenda_styles.css" />
+    <link rel="stylesheet" href="../../assets/css/agenda_premium.css" />
+    <div class="container-fluid mt-3 agenda-page">
+        <div class="agenda-header mb-3">
+            <div class="agenda-header-left">
+                <div class="agenda-title-block">
+                    <h2 class="agenda-title">Agenda de Consultas</h2>
+                    <span class="agenda-subtitle">Gestão diária de atendimentos</span>
                 </div>
-            </div>
-
-            <% if (user.role === "MEDICO") { %>
-            <div class="card mb-3 agenda-card">
-                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center agenda-sidebar-header">
-                    Minha Escala
-                    <button class="btn btn-sm btn-light py-0 px-1"
-                            data-bs-toggle="modal" data-bs-target="#escalaModal"
-                            aria-label="Gerenciar Escala">
-                        <i class="bi bi-pencil-square fs-6"></i>
+                <% if (user.role==="MEDICO" ) { %>
+                    <button class="btn btn-success shadow-sm" id="nova-consulta" data-bs-toggle="modal"
+                        data-bs-target="#novaConsultaModal">
+                        <i class="bi bi-plus-circle me-1"></i> Nova Consulta
                     </button>
-                </div>
-                <div class="card-body p-2 agenda-escala-body">
-                    <div class="escala-dia-header">
-                        <i class="bi bi-clock-history me-1"></i>
-                        <span id="escala-dia-label">Escala do dia</span>
-                    </div>
-                    <div id="escala-dia-summary" class="escala-dia-summary">
-                        <p class="text-muted small mb-0">Carregando escala...</p>
-                    </div>
+                    <% } %>
+                        <button class="btn btn-outline-secondary btn-sm" id="ir-para-hoje">Hoje</button>
+            </div>
+
+            <div class="agenda-header-center">
+                <div class="agenda-date-nav">
+                    <button class="btn btn-light agenda-nav-btn" id="prev-day" aria-label="Dia Anterior"><i
+                            class="bi bi-chevron-left"></i></button>
+                    <button class="btn btn-light agenda-nav-btn" id="next-day" aria-label="Próximo Dia"><i
+                            class="bi bi-chevron-right"></i></button>
+                    <span id="data-atual" class="fw-bold    text-dark agenda-date-display">
+                        <%= formattedDate %>
+                    </span>
                 </div>
             </div>
-            <% } %>
 
+            <div class="agenda-header-right">
+                <div class="agenda-header-metrics">
+                    <span class="metric-pill metric-total">Total <strong id="metric-total">0</strong></span>
+                    <span class="metric-pill metric-agendadas">Agendadas <strong id="metric-agendadas">0</strong></span>
+                    <span class="metric-pill metric-confirmadas">Confirmadas <strong
+                            id="metric-confirmadas">0</strong></span>
+                    <span class="metric-pill metric-canceladas">Canceladas <strong
+                            id="metric-canceladas">0</strong></span>
+                </div>
+
+                <button class="btn btn-outline-secondary btn-sm agenda-print me-2"><i class="bi bi-printer me-1"></i>
+                    Imprimir</button>
+            </div>
         </div>
 
-        <div class="col-md-6 agenda-col agenda-col-center">
-            <div class="agenda-main-area">
-                <div id="agenda-horarios">
-                    <div class="text-center p-5 text-muted">
-                        <i class="bi bi-arrow-clockwise spin me-2"></i>Carregando agenda...
+        <div class="row g-3 agenda-layout">
+            <div class="col-md-3 agenda-col agenda-col-left">
+                <div class="card mb-3 agenda-card">
+                    <div class="card-body calendar-sim">
+                        <div class="calendar-controls mb-3">
+                            <div class="calendar-nav-group">
+                                <button class="btn btn-icon-sm" id="prev-month-btn" title="Mês Anterior">
+                                    <i class="bi bi-chevron-left"></i>
+                                </button>
+                                <span class="calendar-current-month" id="calendar-title">Outubro de 2025</span>
+                                <button class="btn btn-icon-sm" id="next-month-btn" title="Próximo Mês">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="calendar-legend">
+                            <span class="legend-dot"></span>
+                            <span>Dias com consultas</span>
+                        </div>
+
+                        <table class="table table-sm table-borderless text-center mb-0 agenda-calendar-table">
+                            <thead class="day-header">
+                                <tr>
+                                    <th>D</th>
+                                    <th>S</th>
+                                    <th>T</th>
+                                    <th>Q</th>
+                                    <th>Q</th>
+                                    <th>S</th>
+                                    <th>S</th>
+                                </tr>
+                            </thead>
+                            <tbody id="calendar-body">
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-                
-                <div class="text-end agenda-summary">
-                    Total de agendamentos no dia: <span id="total-agendamentos">0</span>
-                </div>
-            </div>
-        </div>
 
-        <div class="col-md-3 agenda-col agenda-col-right">
-            <div class="card agenda-card" id="horarios-livres-card">
-                <div class="card-header bg-light fw-bold agenda-sidebar-header">Próximos horários livres</div>
-                <div class="card-body" id="horarios-livres">
-                    <p class="text-muted small text-center mt-3" id="loading-horarios">Carregando horários...</p>
-                </div>
+
             </div>
 
-            <div class="card mt-3 agenda-card">
-                <div class="card-header bg-light border-bottom fw-bold agenda-sidebar-header">
-                    Consultas do dia
+            <div class="col-md-6 agenda-col agenda-col-center">
+                <div class="agenda-main-area">
+                    <div id="agenda-horarios">
+                        <div class="text-center p-5 text-muted">
+                            <i class="bi bi-arrow-clockwise spin me-2"></i>Carregando agenda...
+                        </div>
+                    </div>
+
+                    <div class="text-end agenda-summary">
+                        Total de agendamentos no dia: <span id="total-agendamentos">0</span>
+                    </div>
                 </div>
-                <div class="card-body p-2" id="resumo-consultas-list">
-                    <p class="text-muted small mb-0">Carregando consultas...</p>
+            </div>
+
+
+            <div class="col-md-3 agenda-col agenda-col-right">
+                <div class="card agenda-card mb-3" id="horarios-livres-card">
+                    <div
+                        class="card-header bg-light fw-bold agenda-sidebar-header d-flex justify-content-between align-items-center">
+                        <span>Horários Disponíveis</span>
+                        <i class="bi bi-lightning-charge text-warning"></i>
+                    </div>
+                    <div class="card-body p-0" id="horarios-livres-container">
+                        <div class="px-3 py-2 border-bottom bg-light-subtle">
+                            <small class="fw-bold text-muted text-uppercase" style="font-size: 0.65rem;">Hoje</small>
+                            <div id="horarios-hoje" class="horarios-grid mt-1">
+                                <p class="text-muted small mb-0 p-2">Calculando...</p>
+                            </div>
+                        </div>
+                        <div class="px-3 py-2 bg-light-subtle">
+                            <small class="fw-bold text-muted text-uppercase" style="font-size: 0.65rem;">Amanhã</small>
+                            <div id="horarios-amanha" class="horarios-grid mt-1">
+                                <p class="text-muted small mb-0 p-2">Calculando...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card agenda-card">
+                    <div class="card-header bg-light border-bottom fw-bold agenda-sidebar-header">
+                        Consultas do dia
+                    </div>
+                    <div class="card-body p-2" id="resumo-consultas-list">
+                        <p class="text-muted small mb-0">Carregando consultas...</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="modal fade" id="novaConsultaModal" tabindex="-1" aria-labelledby="novaConsultaModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-md">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="novaConsultaModalLabel"><i class="bi bi-calendar-plus me-2"></i>Agendar Nova Consulta</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal fade" id="novaConsultaModal" tabindex="-1" aria-labelledby="novaConsultaModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="novaConsultaModalLabel"><i class="bi bi-calendar-plus me-2"></i>Agendar
+                        Nova Consulta</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <form id="form-nova-consulta">
+                    <div class="modal-body">
+                        <div class="modal-steps">
+                            <div class="step active">
+                                <span class="step-index">1</span>
+                                <span class="step-label"><i class="bi bi-person me-1"></i>Paciente</span>
+                            </div>
+                            <div class="step">
+                                <span class="step-index">2</span>
+                                <span class="step-label"><i class="bi bi-clock me-1"></i>Data/Hora</span>
+                            </div>
+                            <div class="step">
+                                <span class="step-index">3</span>
+                                <span class="step-label"><i class="bi bi-tag me-1"></i>Tipo</span>
+                                <span class="step-badge" id="step-type-badge"></span>
+                            </div>
+                        </div>
+                        <div class="step-group active" data-step="1">
+                            <div class="mb-3 position-relative" id="paciente-search-container">
+                                <label for="paciente-select" class="form-label">Nome do Paciente</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                    <input class="form-control" id="paciente-select" autocomplete="off"
+                                        placeholder="Digite o nome para buscar o paciente..." required>
+                                    <button class="btn btn-outline-secondary" type="button" id="clear-paciente"
+                                        style="display:none;"><i class="bi bi-x-circle"></i></button>
+                                </div>
+                                <div id="paciente-search-results"
+                                    class="paciente-results-container shadow-sm border rounded"></div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="paciente-cpf" class="form-label">CPF</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-person-vcard"></i></span>
+                                    <input type="text" class="form-control" id="paciente-cpf"
+                                        placeholder="Apenas números (obrigatório)" required>
+                                </div>
+                            </div>
+
+                            <div class="row g-2">
+                                <div class="col-md-6 mb-3">
+                                    <label for="paciente-cep" class="form-label">CEP</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="paciente-cep"
+                                            placeholder="00000-000" maxlength="9">
+                                        <button class="btn btn-outline-primary" type="button"
+                                            id="btn-consulta-cep-agenda"><i class="bi bi-search"></i></button>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="paciente-logradouro" class="form-label">Logradouro</label>
+                                    <input type="text" class="form-control" id="paciente-logradouro"
+                                        placeholder="Rua / Avenida">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="paciente-numero" class="form-label">Número</label>
+                                    <input type="text" class="form-control" id="paciente-numero" placeholder="Nº">
+                                </div>
+                                <div class="col-md-8 mb-3">
+                                    <label for="paciente-complemento" class="form-label">Complemento</label>
+                                    <input type="text" class="form-control" id="paciente-complemento"
+                                        placeholder="Apto, Bloco, etc.">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="paciente-bairro" class="form-label">Bairro</label>
+                                    <input type="text" class="form-control" id="paciente-bairro" placeholder="Bairro">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="paciente-cidade" class="form-label">Cidade</label>
+                                    <input type="text" class="form-control" id="paciente-cidade" placeholder="Cidade">
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <label for="paciente-estado" class="form-label">UF</label>
+                                    <input type="text" class="form-control" id="paciente-estado" placeholder="UF"
+                                        maxlength="2">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="step-group" data-step="2">
+                            <div class="row">
+                                <div class="col-6 mb-3">
+                                    <label for="data-consulta" class="form-label">Data</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
+                                        <input type="date" class="form-control" id="data-consulta" required>
+                                    </div>
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <label for="hora-consulta" class="form-label">Hora</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-clock"></i></span>
+                                        <input type="time" class="form-control" id="hora-consulta" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="step-group" data-step="3">
+                            <div class="mb-3">
+                                <label for="tipo-consulta" class="form-label">Tipo de Consulta</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-card-list"></i></span>
+                                    <select class="form-select" id="tipo-consulta" required>
+                                        <option value="">Selecione o tipo...</option>
+                                        <option value="Rotina">Consulta de Rotina</option>
+                                        <option value="Retorno">Retorno / Pós-Consulta</option>
+                                        <option value="Emergência">Atendimento de Emergência</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="step-group" data-step="4">
+                            <div class="review-card">
+                                <h6 class="review-title"><i class="bi bi-clipboard-check me-2"></i>Revisar antes de
+                                    salvar
+                                </h6>
+                                <div class="review-grid">
+                                    <div class="review-item">
+                                        <span class="label">Paciente</span>
+                                        <span class="value" id="review-paciente">—</span>
+                                    </div>
+                                    <div class="review-item">
+                                        <span class="label">CPF</span>
+                                        <span class="value" id="review-cpf">—</span>
+                                    </div>
+                                    <div class="review-item">
+                                        <span class="label"><i class="bi bi-geo-alt me-1"></i>Endereço</span>
+                                        <span class="value" id="review-endereco">—</span>
+                                    </div>
+                                    <div class="review-item">
+                                        <span class="label"><i class="bi bi-calendar-event me-1"></i>Data</span>
+                                        <span class="value" id="review-data">—</span>
+                                    </div>
+                                    <div class="review-item">
+                                        <span class="label"><i class="bi bi-clock me-1"></i>Hora</span>
+                                        <span class="value" id="review-hora">—</span>
+                                    </div>
+                                    <div class="review-item">
+                                        <span class="label"><i class="bi bi-card-list me-1"></i>Tipo</span>
+                                        <span class="value" id="review-tipo">—</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <button type="button" class="btn btn-link text-secondary text-decoration-none"
+                            data-bs-dismiss="modal">Sair</button>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-outline-primary px-4" id="step-back-btn">
+                                <i class="bi bi-arrow-left me-1"></i> Voltar
+                            </button>
+                            <button type="button" class="btn btn-primary px-4" id="step-next-btn">
+                                Próximo <i class="bi bi-arrow-right ms-1"></i>
+                            </button>
+                            <button type="submit" class="btn btn-success px-4" style="display:none;">
+                                <i class="bi bi-check-circle me-1"></i> Finalizar Agendamento
+                            </button>
+                        </div>
+                    </div>
+                </form>
             </div>
-            <form id="form-nova-consulta">
-                <div class="modal-body">
-                    <div class="modal-steps">
-                        <div class="step active">
-                            <span class="step-index">1</span>
-                            <span class="step-label"><i class="bi bi-person me-1"></i>Paciente</span>
-                        </div>
-                        <div class="step">
-                            <span class="step-index">2</span>
-                            <span class="step-label"><i class="bi bi-clock me-1"></i>Data/Hora</span>
-                        </div>
-                        <div class="step">
-                            <span class="step-index">3</span>
-                            <span class="step-label"><i class="bi bi-tag me-1"></i>Tipo</span>
-                            <span class="step-badge" id="step-type-badge"></span>
-                        </div>
-                    </div>
-                    <div class="step-group" data-step="1">
-                        <div class="mb-3">
-                            <label for="paciente-select" class="form-label">Nome do Paciente</label>
-                            <input
-                                class="form-control"
-                                list="pacientes-datalist"
-                                id="paciente-select"
-                                autocomplete="off"
-                                placeholder="Digite para buscar ou adicionar um novo paciente..."
-                                required
-                            >
-                            <datalist id="pacientes-datalist"></datalist>
-                        </div>
+        </div>
+    </div>
 
-                        <div class="mb-3">
-                            <label for="paciente-cpf" class="form-label">CPF</label>
-                            <input type="text" class="form-control" id="paciente-cpf" placeholder="Apenas números (obrigatório)" required>
-                        </div>
 
-                        <div class="mb-3">
-                            <label for="paciente-endereco" class="form-label">Endereço (Opcional)</label>
-                            <input type="text" class="form-control" id="paciente-endereco" placeholder="Rua, número, cidade">
-                        </div>
-                    </div>
-
-                    <div class="step-group" data-step="2">
-                        <div class="row">
-                            <div class="col-6 mb-3">
-                                <label for="data-consulta" class="form-label">Data</label>
-                                <input type="date" class="form-control" id="data-consulta" required>
-                            </div>
-                            <div class="col-6 mb-3">
-                                <label for="hora-consulta" class="form-label">Hora</label>
-                                <input type="time" class="form-control" id="hora-consulta" required>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="step-group" data-step="3">
-                        <div class="mb-3">
-                            <label for="tipo-consulta" class="form-label">Tipo de Consulta</label>
-                            <select class="form-select" id="tipo-consulta" required>
-                                <option value="">Selecione...</option>
-                                <option value="Rotina">Rotina</option>
-                                <option value="Retorno">Retorno</option>
-                                <option value="Emergência">Emergência</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="step-group" data-step="4">
-                        <div class="review-card">
-                            <h6 class="review-title"><i class="bi bi-clipboard-check me-2"></i>Revisar antes de salvar</h6>
-                            <div class="review-grid">
-                                <div class="review-item">
-                                    <span class="label">Paciente</span>
-                                    <span class="value" id="review-paciente">—</span>
-                                </div>
-                                <div class="review-item">
-                                    <span class="label">CPF</span>
-                                    <span class="value" id="review-cpf">—</span>
-                                </div>
-                                <div class="review-item">
-                                    <span class="label">Endereço</span>
-                                    <span class="value" id="review-endereco">—</span>
-                                </div>
-                                <div class="review-item">
-                                    <span class="label">Data</span>
-                                    <span class="value" id="review-data">—</span>
-                                </div>
-                                <div class="review-item">
-                                    <span class="label">Hora</span>
-                                    <span class="value" id="review-hora">—</span>
-                                </div>
-                                <div class="review-item">
-                                    <span class="label">Tipo</span>
-                                    <span class="value" id="review-tipo">—</span>
-                                </div>
-                            </div>
-                        </div>
+    <div class="modal fade" id="pacienteDetailModal" tabindex="-1" aria-labelledby="pacienteDetailModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="pacienteDetailModalLabel">Detalhes do Agendamento</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div id="modal-content-area">
+                        <p class="text-center text-muted p-5">Carregando dados...</p>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-outline-secondary" id="step-back-btn">Voltar</button>
-                    <button type="button" class="btn btn-primary" id="step-next-btn">Próximo</button>
-                    <button type="submit" class="btn btn-success"><i class="bi bi-save me-1"></i>Salvar Agendamento</button>
+                    <button type="button" class="btn btn-success" id="btn-iniciar-atendimento">
+                        <i class="bi bi-play-circle me-1"></i> Iniciar Atendimento
+                    </button>
+
+                    <button type="button" class="btn btn-danger me-auto" id="btn-cancelar-agendamento-footer">
+                        <i class="bi bi-x-octagon me-1"></i> Cancelar Agendamento
+                    </button>
+
+                    <button type="button" class="btn btn-info" id="btn-editar-agendamento">
+                        <i class="bi bi-pencil-square me-1"></i> Editar Agendamento
+                    </button>
+
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
                 </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="escalaModal" tabindex="-1" aria-labelledby="escalaModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="escalaModalLabel"><i class="bi bi-clock-history me-2"></i>Gerenciar Escala de Trabalho</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p class="text-muted small">Defina o período de trabalho padrão para cada dia da semana. Você pode configurar vários turnos para o mesmo dia (ex: manhã e tarde) adicionando novos registros.</p>
-
-                <div id="escala-table-container">
-                    <table class="table table-bordered table-striped table-escala" id="escala-table">
-                        <thead>
-                            <tr>
-                                <th>Dia da Semana</th>
-                                <th>Início (HH:MM)</th>
-                                <th>Fim (HH:MM)</th>
-                                <th>Duração (Min)</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="escala-table-body">
-                            <tr>
-                                <td colspan="5" class="text-center text-muted">Carregando escalas...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <button class="btn btn-sm btn-outline-primary mt-3" id="add-escala-row">
-                    <i class="bi bi-plus-circle me-1"></i> Adicionar Regra de Horário
-                </button>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                <button type="button" class="btn btn-primary" id="save-all-escalas-btn">
-                    <i class="bi bi-save"></i> Salvar Todas as Escalas
-                </button>
             </div>
         </div>
     </div>
-</div>
 
-<div class="modal fade" id="pacienteDetailModal" tabindex="-1" aria-labelledby="pacienteDetailModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="pacienteDetailModalLabel">Detalhes do Agendamento</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-0">
-                <div id="modal-content-area">
-                    <p class="text-center text-muted p-5">Carregando dados...</p>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-success" id="btn-iniciar-atendimento">
-                    <i class="bi bi-play-circle me-1"></i> Iniciar Atendimento
-                </button>
+    <!-- 🔩 CONFIGURATION SIDE PANEL -->
+    <div class="config-side-panel" id="config-panel">
+        <div class="config-header">
+            <h4 class="mb-0 fw-bold"><i class="bi bi-gear-wide-connected me-2"></i>Personalização</h4>
+            <button class="btn-close" id="btn-close-config"></button>
+        </div>
 
-                <button type="button" class="btn btn-danger me-auto" id="btn-cancelar-agendamento-footer">
-                    <i class="bi bi-x-octagon me-1"></i> Cancelar Agendamento
-                </button>
-
-                <button type="button" class="btn btn-info" id="btn-editar-agendamento">
-                    <i class="bi bi-pencil-square me-1"></i> Editar Agendamento
-                </button>
-
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+        <div class="config-section">
+            <div class="config-title"><i class="bi bi-palette"></i> Esfera Visual (Tema)</div>
+            <div class="theme-choice">
+                <div class="theme-blob theme-blue active" data-theme="serious" title="Serious Medical"></div>
+                <div class="theme-blob theme-dark" data-theme="dark" title="Night Shift"></div>
+                <div class="theme-blob theme-green" data-theme="zen" title="Zen Clinic"></div>
             </div>
         </div>
+
+        <div class="config-section">
+            <div class="config-title"><i class="bi bi-layout-three-columns"></i> Widgets do Monitor</div>
+            <div class="widget-toggle-list">
+                <div class="widget-toggle" data-wid="next_patient">
+                    <span>Próximo Paciente</span>
+                    <div class="form-check form-switch"><input class="form-check-input" type="checkbox" checked
+                            disabled></div>
+                </div>
+                <div class="widget-toggle" data-wid="stats">
+                    <span>Eficiência Real-time</span>
+                    <div class="form-check form-switch"><input class="form-check-input" type="checkbox" checked></div>
+                </div>
+                <div class="widget-toggle" data-wid="waiting_room">
+                    <span>Sala de Espera</span>
+                    <div class="form-check form-switch"><input class="form-check-input" type="checkbox" checked></div>
+                </div>
+                <div class="widget-toggle" data-wid="attained">
+                    <span>Contagem de Atendidos</span>
+                    <div class="form-check form-switch"><input class="form-check-input" type="checkbox" checked></div>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-premium-save" id="btn-save-preferences">
+            APLICAR CONFIGURAÇÕES
+        </button>
+
+        <div class="mt-4 text-center">
+            <span class="badge bg-light text-muted border py-2 px-3">
+                <i class="bi bi-shield-check me-2"></i>Adaptado pelo Motor IA
+            </span>
+        </div>
     </div>
-</div>
+
+    <!-- Scripts da Agenda -->
+    <script>
+        window.userPreferences = JSON.parse(`<%- user.preferences || '{}' %>`);
+    </script>
